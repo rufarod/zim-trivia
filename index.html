@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tomato's Zim Trip – Zimbabwe trivia by ExploreLocally</title>
+<meta name="description" content="Cycle across Zimbabwe with the ExploreLocally tomato. Ten stops from Victoria Falls to the Matobo Hills, five questions and 60 seconds at each. How far can you ride?">
+<link rel="canonical" href="https://zimtrivia.explorelocally.co.zw/">
+<meta name="theme-color" content="#6DB8CE">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ExploreLocally">
+<meta property="og:title" content="Tomato's Zim Trip – how well do you know Zimbabwe?">
+<meta property="og:description" content="Ten stops, five questions each, 60 seconds on the clock. Two wrong answers and the trip is over.">
+<meta property="og:url" content="https://zimtrivia.explorelocally.co.zw/">
+<meta property="og:image" content="https://zimtrivia.explorelocally.co.zw/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap">
+<style>
+[hidden]{display:none!important}
+:root{
+  --sky:#6DB8CE; --sky-deep:#4E9FB8; --navy:#1E3248; --navy-deep:#132234;
+  --cream:#F7ECD4; --paper:#FFF8E8; --red:#E2482F; --yellow:#F6B531; --leaf:#4E9A3A; --leaf-lt:#7CC05A;
+  --good:#3F8F3A; --good-bg:#CDEBB8; --bad:#C2361F; --bad-bg:#F9C7B9; --muted:#56657A;
+  --display:"Lilita One","Arial Rounded MT Bold","Arial Black",sans-serif;
+  --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100%;
+  background:radial-gradient(120% 90% at 40% 20%,#8CCBDD 0%,var(--sky) 45%,var(--sky-deep) 100%) fixed;
+  background-color:var(--sky);
+  font-family:var(--body);color:var(--navy);padding-inline:16px;
+}
+.app{max-width:1140px;margin:0 auto;padding-block:16px 28px;display:grid;gap:14px}
+
+/* HUD */
+.hud{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:clamp(26px,4vw,36px);line-height:1;color:var(--cream);
+  -webkit-text-stroke:0;text-shadow:0 3px 0 var(--navy),2px 0 0 var(--navy),-2px 0 0 var(--navy),0 -2px 0 var(--navy),2px 3px 0 var(--navy),-2px 3px 0 var(--navy);
+  margin:0 auto 0 0;letter-spacing:.5px}
+.chip{display:flex;align-items:center;gap:8px;background:var(--paper);border:3px solid var(--navy);border-radius:999px;
+  padding:6px 14px 6px 12px;box-shadow:0 4px 0 var(--navy);font-weight:800;font-size:14px;position:relative}
+.chip b{font-family:var(--display);font-weight:400;font-size:20px;font-variant-numeric:tabular-nums;line-height:1}
+.chip span{text-transform:uppercase;letter-spacing:.08em;font-size:11px;color:var(--muted)}
+.lives{display:flex;gap:4px}
+.life{width:22px;height:22px;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .35s,filter .35s}
+.life.lost{filter:grayscale(1);opacity:.3;transform:scale(.75) rotate(-20deg)}
+.float{position:absolute;right:8px;top:-8px;font-family:var(--display);font-size:20px;color:var(--good);pointer-events:none;
+  text-shadow:0 2px 0 var(--paper)}
+
+/* layout */
+.main{display:grid;gap:18px;align-items:start}
+@media (min-width:900px){.main{grid-template-columns:minmax(0,1.3fr) minmax(340px,1fr)}}
+.mapwrap{position:relative}
+#map{width:100%;height:auto;display:block;overflow:visible}
+.mapbtn,.mapcap,.mapclose{display:none}
+
+/* ---------- phones & small tablets: questions first, map pops up ---------- */
+@media (max-width:899px){
+  .app{padding-block:12px 24px;gap:12px}
+  .hud{display:grid;grid-template-columns:auto auto 1fr auto;align-items:center;gap:10px 8px}
+  .brand{font-size:26px;grid-column:1/4;grid-row:1}
+  .mapbtn{grid-column:4;grid-row:1}
+  .hud .chip:not(.mapbtn){grid-row:2;justify-self:start}
+  .hud .chip:nth-child(4){grid-column:3/5}
+  .main{grid-template-columns:minmax(0,1fr)}
+  .chip{padding:4px 10px 4px 9px;gap:6px;box-shadow:0 3px 0 var(--navy)}
+  .chip b{font-size:17px}
+  .chip span{font-size:10px}
+  .chip.best{display:none}
+  .life{width:19px;height:19px}
+  .mapbtn{display:flex;cursor:pointer;font:inherit;color:var(--navy)}
+  .mapbtn svg{width:18px;height:18px}
+  .mapwrap{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+    padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));
+    background:rgba(19,34,52,.62);opacity:0;visibility:hidden;transition:opacity .35s ease,visibility 0s linear .35s}
+  .mapOpen .mapwrap{opacity:1;visibility:visible;transition:opacity .35s ease}
+  .mapOpen{overflow:hidden}
+  .mapcard{width:100%;max-width:560px;background:radial-gradient(120% 90% at 40% 20%,#8CCBDD 0%,var(--sky) 55%,var(--sky-deep) 100%);
+    border:4px solid var(--navy);border-radius:24px;box-shadow:0 8px 0 var(--navy);padding:12px 10px 8px;
+    transform:translateY(48px) scale(.94);transition:transform .5s cubic-bezier(.34,1.3,.64,1)}
+  .mapOpen .mapcard{transform:none}
+  .mapcap{display:block;margin:0 0 4px;text-align:center;font:400 22px/1.1 var(--display);color:var(--cream);
+    text-shadow:0 2px 0 var(--navy),2px 0 0 var(--navy),-2px 0 0 var(--navy),0 -2px 0 var(--navy)}
+  #map{max-height:calc(100dvh - 190px);margin:0 auto}
+  .map-title{display:none}
+  .mapclose{display:block;justify-self:center;align-self:center;width:auto}
+  .panel{padding:18px 16px 20px;min-height:0;border-radius:20px;box-shadow:0 6px 0 var(--navy)}
+  .scr{gap:12px}
+  .lede{font-size:16px}
+  .question{font-size:20px}
+  .opt{min-height:54px;padding:10px 12px}
+  .cta{justify-self:stretch;text-align:center;font-size:19px;padding:15px 20px}
+  .fb .cta{width:100%}
+  .actions .link-btn,.explore{flex:1 1 100%;justify-self:stretch}
+  .stat b{font-size:22px}
+}
+
+/* panel */
+.panel{background:var(--cream);border:4px solid var(--navy);border-radius:24px;box-shadow:0 8px 0 var(--navy);
+  padding:22px 22px 24px;min-height:360px;position:relative}
+.scr{display:grid;gap:14px;animation:scrIn .5s cubic-bezier(.34,1.3,.64,1) both}
+@keyframes scrIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.eyebrow{font-weight:900;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0}
+h1,h2{font-family:var(--display);font-weight:400;margin:0;line-height:1.05;text-wrap:balance}
+h1{font-size:clamp(34px,4.5vw,46px)}
+h2{font-size:clamp(28px,3.4vw,36px)}
+.lede{margin:0;font-size:17px;line-height:1.5;max-width:40ch}
+.rules{display:grid;gap:8px;margin:2px 0 4px;padding:0;list-style:none}
+.rules li{display:flex;gap:10px;align-items:center;font-weight:700;font-size:15px}
+.rules i{font-style:normal;flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+  background:var(--paper);border:2.5px solid var(--navy);font-family:var(--display);font-size:15px}
+.cta{justify-self:start;font:400 20px/1 var(--display);letter-spacing:.3px;color:var(--navy);background:var(--yellow);
+  border:3px solid var(--navy);border-radius:999px;padding:14px 26px;cursor:pointer;box-shadow:0 5px 0 var(--navy);
+  transition:transform .12s,box-shadow .12s}
+.cta:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--navy)}
+.cta:active{transform:translateY(4px);box-shadow:0 1px 0 var(--navy)}
+button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
+.small{font-size:14px;color:var(--muted);font-weight:700;margin:0}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.link-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:800 15px/1.2 var(--body);color:var(--navy);
+  background:var(--paper);border:3px solid var(--navy);border-radius:999px;padding:11px 18px;text-decoration:none;cursor:pointer;
+  box-shadow:0 4px 0 var(--navy);transition:transform .12s,box-shadow .12s}
+.link-btn:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--navy)}
+.link-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--navy)}
+.link-btn:focus-visible{outline:3px solid var(--red);outline-offset:3px}
+.link-btn.wa{background:#CFF3D9}
+.link-btn svg{width:18px;height:18px;flex:none}
+.explore{justify-self:start}
+.sharetext{width:100%;min-height:74px;font:600 14px/1.4 var(--body);color:var(--navy);background:var(--paper);border:2.5px solid var(--navy);border-radius:12px;padding:8px 10px;resize:none}
+
+/* question */
+.qtop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.clock{font-family:var(--display);font-size:26px;font-variant-numeric:tabular-nums;line-height:1}
+.clock.hot{color:var(--bad)}
+.bar{height:12px;background:#E3D5B4;border:2.5px solid var(--navy);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:var(--yellow);transform-origin:left;border-right:2.5px solid var(--navy)}
+.bar.hot i{background:var(--red)}
+.pips{display:flex;gap:6px}
+.pip{width:26px;height:8px;border-radius:99px;background:#E3D5B4;border:2px solid var(--navy)}
+.pip.ok{background:var(--leaf)}.pip.no{background:var(--red)}.pip.now{background:var(--paper);box-shadow:0 0 0 2px var(--yellow)}
+.question{font-family:var(--body);font-weight:900;font-size:clamp(20px,2.3vw,24px);line-height:1.3;margin:2px 0 0;text-wrap:pretty}
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:800 16px/1.3 var(--body);color:var(--navy);
+  background:var(--paper);border:3px solid var(--navy);border-radius:16px;padding:11px 14px;cursor:pointer;
+  box-shadow:0 4px 0 var(--navy);transition:transform .12s,box-shadow .12s,background .2s}
+.opt:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 0 var(--navy)}
+.opt:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--navy)}
+.opt:disabled{cursor:default}
+.opt .k{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--cream);
+  border:2.5px solid var(--navy);font:400 15px/1 var(--display)}
+.opt.right{background:var(--good-bg);border-color:var(--good);box-shadow:0 4px 0 var(--good)}
+.opt.right .k{background:var(--good);color:#fff;border-color:var(--good)}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad);box-shadow:0 4px 0 var(--bad);animation:shake .45s}
+.opt.wrong .k{background:var(--bad);color:#fff;border-color:var(--bad)}
+.opt.dim{opacity:.5}
+.optrow{position:relative}
+.optrow.hasSrc .opt{padding-right:104px}
+.srcbtn{position:absolute;right:12px;top:50%;transform:translateY(-50%);font:900 12px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--good);background:var(--paper);border:2.5px solid var(--good);border-radius:999px;padding:8px 11px;cursor:pointer;
+  animation:srcIn .45s cubic-bezier(.34,1.56,.64,1) .15s both}
+.srcbtn:hover{background:#fff}
+.srcbtn:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+@keyframes srcIn{from{transform:translateY(-50%) scale(0)}to{transform:translateY(-50%) scale(1)}}
+.autobar{flex:1 1 100%;height:7px;border-radius:99px;background:#E3D5B4;overflow:hidden}
+.autobar i{display:block;height:100%;background:var(--good);transform-origin:left;animation:autofill var(--auto,1.8s) linear forwards}
+@keyframes autofill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.srcpop{position:absolute;inset:0;z-index:5;background:var(--cream);border-radius:20px;padding:22px;display:grid;align-content:center;gap:12px;
+  overflow:auto;animation:scrIn .4s cubic-bezier(.34,1.3,.64,1) both}
+.srcpop .lede{max-width:none}
+.srcpop .link-btn{justify-self:start}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(2px)}}
+.fb{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  border-top:3px dashed #D9C79F;padding-top:12px}
+.fb p{margin:0;font-size:15px;line-height:1.45;flex:1 1 220px}
+.fb strong{display:block;font-family:var(--display);font-weight:400;font-size:20px}
+.fb .good{color:var(--good)}.fb .bad{color:var(--bad)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
+.stat{background:var(--paper);border:3px solid var(--navy);border-radius:16px;padding:10px 12px}
+.stat span{display:block;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stat b{font:400 26px/1.1 var(--display);font-variant-numeric:tabular-nums}
+
+/* map bits */
+.map-title{font-family:var(--display);font-size:40px;text-anchor:middle;fill:var(--cream);stroke:var(--navy);stroke-width:10px;paint-order:stroke;stroke-linejoin:round}
+.fx{transform-box:fill-box;transform-origin:50% 100%}
+.ctr{transform-box:fill-box;transform-origin:50% 50%}
+.top{transform-box:fill-box;transform-origin:50% 0%}
+.place{transition:opacity .6s,filter .6s}
+.place.locked{opacity:.5;filter:grayscale(.85)}
+.tag text{font-family:var(--display);font-size:22px;text-anchor:middle;fill:var(--navy)}
+.tag rect{fill:var(--paper);stroke:var(--navy);stroke-width:4}
+.tag{transform:scale(0);transition:transform .6s cubic-bezier(.34,1.56,.64,1)}
+.tag.on{transform:none}
+.tick{transform:scale(0);transition:transform .5s cubic-bezier(.34,1.8,.64,1) .2s}
+.done .tick{transform:none}
+.ring{opacity:0}
+.ring.on{animation:ring 1.6s ease-out infinite}
+@keyframes ring{0%{transform:scale(.4);opacity:.9}100%{transform:scale(1.6);opacity:0}}
+.lm.celebrate{animation:celebrate 1s linear}
+@keyframes celebrate{0%{transform:none;animation-timing-function:cubic-bezier(0,.55,.45,1)}28%{transform:translateY(-18px) scale(.95,1.06);animation-timing-function:cubic-bezier(.55,0,1,.45)}52%{transform:scale(1.08,.92);animation-timing-function:cubic-bezier(0,.55,.45,1)}72%{transform:translateY(-5px) scale(.99,1.02);animation-timing-function:cubic-bezier(.55,0,1,.45)}88%,100%{transform:none}}
+.streak{stroke-dasharray:14 22;animation:fall .5s linear infinite}
+@keyframes fall{to{stroke-dashoffset:-36}}
+.mist{animation:mist 1.4s ease-in-out infinite}
+@keyframes mist{0%,100%{transform:scale(.85)}50%{transform:scale(1.15)}}
+.boat{animation:boat 2.4s ease-in-out infinite}
+@keyframes boat{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg) translateY(-3px)}75%{transform:rotate(6deg)}}
+.hippo{animation:hippo 3.2s ease-in-out infinite}
+@keyframes hippo{0%,40%,100%{transform:translateY(8px)}55%,85%{transform:translateY(-4px)}}
+.ripple{animation:ripple 2s ease-out infinite}
+@keyframes ripple{from{transform:scale(.4);opacity:.9}to{transform:scale(1.4);opacity:0}}
+.cloud{animation:cloud 6s ease-in-out infinite}
+@keyframes cloud{0%,100%{transform:translateX(-14px)}50%{transform:translateX(14px)}}
+.sunrays{animation:whirl 16s linear infinite}
+@keyframes whirl{to{transform:rotate(360deg)}}
+.flagwave{animation:flagwave 1.6s ease-in-out infinite}
+@keyframes flagwave{0%,100%{transform:rotate(0)}50%{transform:rotate(8deg)}}
+.trunk{animation:trunk 3s ease-in-out infinite}
+@keyframes trunk{0%,100%{transform:rotate(0)}50%{transform:rotate(9deg)}}
+.soar{animation:soar 5s ease-in-out infinite}
+@keyframes soar{0%,100%{transform:translate(0,0)}50%{transform:translate(26px,-8px)}}
+.bloom{animation:bloom 3s ease-in-out infinite}
+@keyframes bloom{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.dot{animation:dotIn .4s cubic-bezier(.34,1.8,.64,1) both}
+@keyframes dotIn{from{transform:scale(0)}to{transform:none}}
+
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important}
+  .tag{transform:none}
+}
+</style>
+
+</head>
+<body>
+<div class="app">
+  <header class="hud">
+    <p class="brand">Tomato's Zim Trip</p>
+    <div class="chip" id="chipScore"><span>Score</span><b id="score">0</b></div>
+    <div class="chip"><span>Stop</span><b id="stopNum">–</b></div>
+    <div class="chip" aria-label="Lives this stop"><span>Lives</span>
+      <div class="lives" id="lives">
+        <svg class="life" viewBox="-20 -24 40 44" aria-hidden="true"><ellipse rx="18" ry="16" fill="#E2482F" stroke="#1E3248" stroke-width="2.5"/><path d="M0-14C-6-21-13-19-16-17C-9-14-5-13 0-14C6-20 13-20 16-17C10-14 6-13 0-14" fill="#4E9A3A"/></svg>
+        <svg class="life" viewBox="-20 -24 40 44" aria-hidden="true"><ellipse rx="18" ry="16" fill="#E2482F" stroke="#1E3248" stroke-width="2.5"/><path d="M0-14C-6-21-13-19-16-17C-9-14-5-13 0-14C6-20 13-20 16-17C10-14 6-13 0-14" fill="#4E9A3A"/></svg>
+      </div>
+    </div>
+    <div class="chip best"><span>Best</span><b id="best">0</b></div>
+    <button class="chip mapbtn" id="mapBtn" type="button" aria-label="Show the map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6.5V20l6-2.5 6 2.5 6-2.5V4l-6 2.5z" fill="#F6B531" stroke="#1E3248" stroke-width="2" stroke-linejoin="round"/><path d="M9 4v13.5M15 6.5V20" stroke="#1E3248" stroke-width="2"/></svg><span>Map</span></button>
+  </header>
+
+  <main class="main">
+    <div class="mapwrap" id="mapwrap"><div class="mapcard"><p class="mapcap" id="mapCap">Your trip</p>
+      <svg id="map" viewBox="0 0 800 720" role="img" aria-label="Map of Zimbabwe showing the tomato's cycling route">
+        <defs>
+          <symbol id="star" viewBox="-10 -10 20 20"><path d="M0-10Q1.5-1.5 10 0Q1.5 1.5 0 10Q-1.5 1.5-10 0Q-1.5-1.5 0-10Z" fill="#FFF6D8"/></symbol>
+          <radialGradient id="tomG" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="#FF7A55"/><stop offset=".55" stop-color="#E2482F"/><stop offset="1" stop-color="#B8301E"/></radialGradient>
+        </defs>
+        <g transform="translate(730 70)">
+          <g class="ctr sunrays" fill="#FFD15C"><path d="M0-54L7-37H-7ZM0 54L7 37H-7ZM-54 0L-37 7V-7ZM54 0L37 7V-7ZM-38-38L-22-30L-30-22ZM38 38L22 30L30 22ZM38-38L30-22L22-30ZM-38 38L-30 22L-22 30Z"/></g>
+          <circle r="29" fill="#FFC53D" stroke="#E8A21A" stroke-width="4"/>
+        </g>
+        <path id="landSide" fill="var(--navy-deep)" stroke="var(--navy-deep)" stroke-width="14" stroke-linejoin="round" transform="translate(0 14)"/>
+        <path id="land" fill="#F2E2B0" stroke="var(--navy)" stroke-width="12" stroke-linejoin="round"/>
+        <path id="river" fill="none" stroke="#4FA7D6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path id="lake" fill="#6CC3E8" stroke="#2F7FB0" stroke-width="4" stroke-linejoin="round"/>
+        <g id="decor"></g>
+        <g id="trail"></g>
+        <g id="places"></g>
+        <g id="rings"></g>
+        <g id="tags"></g>
+        <path id="route" fill="none" stroke="none"/>
+        <g id="fxLayer"></g>
+        <g id="mbike" transform="translate(70 400)"><g id="mflip"><g id="mhop" class="fx">
+          <g fill="none" stroke="var(--navy)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+            <g class="ctr mw"><circle cx="-24" cy="-16" r="15"/><path d="M-24-29V-3M-37-16H-11" stroke-width="2.5"/></g>
+            <g class="ctr mw"><circle cx="24" cy="-16" r="15"/><path d="M24-29V-3M11-16H37" stroke-width="2.5"/></g>
+            <path d="M-24-16L-9-38H12L24-16M-9-38L-2-16H-24M-2-16L12-38M-13-44H-4M12-38L9-50L17-53"/>
+          </g>
+          <g id="rider" transform="translate(-6 -62)"><g id="face" class="ctr">
+            <ellipse rx="19" ry="17" fill="url(#tomG)"/>
+            <path d="M0-15C-6-22-14-20-18-18C-10-15-6-14 0-15C6-21 14-21 18-18C12-15 6-14 0-15C-1-21 1-25 4-28" fill="#4E9A3A" stroke="#2F6B2A" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+            <g id="happy"><path d="M-10-2Q-7-6-4-2M4-2Q7-6 10-2" fill="none" stroke="#3A1410" stroke-width="2.5" stroke-linecap="round"/><path d="M-6 5Q0 11 6 5" fill="none" stroke="#3A1410" stroke-width="2.5" stroke-linecap="round"/></g>
+            <g id="sad" style="display:none"><path d="M-10-5L-4-1M-10-1L-4-5M4-5L10-1M4-1L10-5" stroke="#3A1410" stroke-width="2.2" stroke-linecap="round"/><path d="M-6 8Q0 3 6 8" fill="none" stroke="#3A1410" stroke-width="2.5" stroke-linecap="round"/></g>
+          </g></g>
+        </g></g></g>
+        <text class="map-title" x="150" y="62">Zimbabwe</text>
+      </svg></div>
+      <button class="cta mapclose" id="mapClose" type="button">Back to the questions</button>
+    </div>
+
+    <section class="panel" id="panel" aria-live="polite"></section>
+  </main>
+</div>
+
+<script src="questions.js"></script>
+<script>
+(function(){
+  var NS='http://www.w3.org/2000/svg';
+  var $=function(id){return document.getElementById(id)};
+  var reduced=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var panel=$('panel');
+
+  /* ---------- map geometry ---------- */
+  function P(lon,lat){return [(lon-24.6)*84+45,(-15.1-lat)*84+80]}
+  function poly(list,close){return list.map(function(c,i){var p=P(c[0],c[1]);return (i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)}).join('')+(close?'Z':'')}
+  var border=[[25.24,-17.78],[25.7,-17.85],[25.86,-17.93],[26.4,-17.93],[26.9,-17.95],[27.3,-17.6],[27.8,-17.2],[28.3,-16.85],[28.8,-16.5],[28.9,-16.0],[29.5,-15.7],[30.4,-15.62],[30.8,-15.9],[31.3,-16.05],[31.9,-16.3],[32.5,-16.6],[32.95,-16.75],[32.85,-17.3],[33.0,-17.9],[32.95,-18.5],[32.75,-19.0],[32.85,-19.7],[32.55,-20.4],[32.4,-21.3],[31.35,-22.4],[30.5,-22.3],[29.9,-22.2],[29.35,-22.2],[29.0,-21.9],[28.4,-21.6],[27.9,-21.5],[27.7,-20.9],[27.2,-20.4],[26.4,-19.8],[26.1,-19.3],[26.0,-18.7],[25.5,-18.3]];
+  var river=[[24.7,-17.6],[25.24,-17.78],[25.7,-17.85],[25.86,-17.93],[26.4,-17.93],[26.9,-17.95],[27.3,-17.6],[27.8,-17.2],[28.3,-16.85],[28.8,-16.5],[28.9,-16.0],[29.5,-15.7],[30.4,-15.62],[31.2,-15.55]];
+  var lake=[[26.95,-17.95],[27.4,-17.5],[27.9,-17.1],[28.4,-16.75],[28.8,-16.48],[28.92,-16.6],[28.5,-16.98],[28.0,-17.38],[27.5,-17.78],[27.05,-18.06]];
+  var land=poly(border,true);
+  $('land').setAttribute('d',land);$('landSide').setAttribute('d',land);
+  $('river').setAttribute('d',poly(river));$('lake').setAttribute('d',poly(lake,true));
+
+  function tree(x,y,s,baobab){
+    var t=document.createElementNS(NS,'g');
+    t.setAttribute('transform','translate('+x+' '+y+') scale('+s+')');
+    t.innerHTML=baobab
+      ?'<path d="M-9 0L-7-30Q-7-36-14-44M7 0L7-30Q7-36 14-46M0-30V-50" fill="none" stroke="#7A5A3C" stroke-width="7" stroke-linecap="round"/><path d="M-11 0L-8-32H8L11 0Z" fill="#9A7350"/><circle cx="-16" cy="-48" r="9" fill="#5A9E48"/><circle cx="16" cy="-50" r="9" fill="#5A9E48"/><circle cx="0" cy="-56" r="10" fill="#6BB356"/>'
+      :'<path d="M0 0V-26M0-18L-10-28M0-20L10-30" stroke="#7A5A3C" stroke-width="4" stroke-linecap="round" fill="none"/><ellipse cx="0" cy="-32" rx="26" ry="8" fill="#6BB356" stroke="#3F8740" stroke-width="2"/>';
+    $('decor').appendChild(t);
+  }
+  [[27.6,-19.4,.9,1],[29.6,-19.0,.8,0],[30.1,-21.6,.85,0],[31.9,-19.6,.8,0],[29.4,-17.3,.75,0],[31.9,-21.2,.75,1],[29.2,-20.9,.7,0]].forEach(function(d){var p=P(d[0],d[1]);tree(p[0],p[1],d[2],d[3])});
+
+  /* ---------- landmark art (bottom-centre anchored) ---------- */
+  var ART={
+    vf:'<path d="M-72 0V-84Q-72-100-56-100H56Q72-100 72-84V0Z" fill="#9A7350" stroke="#1E3248" stroke-width="6" stroke-linejoin="round"/><path d="M-66-98Q-58-116-40-104Q-30-120-12-106H12Q30-120 40-104Q58-116 66-98Z" fill="#4E9A3A" stroke="#2F6B2A" stroke-width="4"/><rect x="-38" y="-100" width="76" height="92" fill="#6CC3E8"/><g stroke="#fff" stroke-width="5" stroke-linecap="round"><path class="streak" d="M-26-98V-10"/><path class="streak" d="M-8-98V-10" style="animation-delay:-.2s"/><path class="streak" d="M10-98V-10" style="animation-delay:-.35s"/><path class="streak" d="M26-98V-10" style="animation-delay:-.1s"/></g><g fill="#fff" opacity=".9"><circle class="ctr mist" cx="-30" cy="-6" r="16"/><circle class="ctr mist" cx="0" cy="-4" r="20" style="animation-delay:-.5s"/><circle class="ctr mist" cx="30" cy="-6" r="16" style="animation-delay:-.9s"/></g><g fill="none" stroke-width="6" opacity=".85" stroke-linecap="round"><path d="M-58-40A58 58 0 0 1 58-40" stroke="#E2482F"/><path d="M-50-40A50 50 0 0 1 50-40" stroke="#F6B531"/><path d="M-42-40A42 42 0 0 1 42-40" stroke="#4E9A3A"/><path d="M-34-40A34 34 0 0 1 34-40" stroke="#3E86C8"/></g>',
+    hw:'<ellipse cx="4" cy="-1" rx="62" ry="7" fill="#1E3248" opacity=".12"/><g fill="#8C95A1" stroke="#1E3248" stroke-width="5"><rect x="-40" y="-36" width="17" height="36" rx="6"/><rect x="-17" y="-36" width="17" height="36" rx="6"/><rect x="8" y="-36" width="17" height="36" rx="6"/><rect x="29" y="-36" width="17" height="36" rx="6"/></g><path d="M-50-66Q-64-56-60-40" fill="none" stroke="#1E3248" stroke-width="4" stroke-linecap="round"/><ellipse cx="0" cy="-60" rx="52" ry="35" fill="#9AA3AE" stroke="#1E3248" stroke-width="5"/><g class="trunk" style="transform-box:fill-box;transform-origin:25% 0%"><path d="M62-64Q80-34 66-10" fill="none" stroke="#1E3248" stroke-width="17" stroke-linecap="round"/><path d="M62-64Q80-34 66-10" fill="none" stroke="#9AA3AE" stroke-width="8" stroke-linecap="round"/></g><circle cx="50" cy="-74" r="25" fill="#9AA3AE" stroke="#1E3248" stroke-width="5"/><ellipse cx="34" cy="-70" rx="17" ry="24" fill="#B3BAC4" stroke="#1E3248" stroke-width="4"/><circle cx="58" cy="-80" r="3.5" fill="#1E3248"/><path d="M60-58Q70-48 60-40" fill="none" stroke="#FFF6E0" stroke-width="6" stroke-linecap="round"/>',
+    kb:'<g transform="translate(-44 6)"><circle class="ctr ripple" r="14" fill="none" stroke="#fff" stroke-width="3"/><g class="hippo"><ellipse rx="20" ry="13" fill="#8E7FA8" stroke="#1E3248" stroke-width="4"/><circle cx="-12" cy="-12" r="5" fill="#8E7FA8" stroke="#1E3248" stroke-width="3"/><circle cx="12" cy="-12" r="5" fill="#8E7FA8" stroke="#1E3248" stroke-width="3"/><circle cx="-7" cy="-4" r="3" fill="#1E3248"/><circle cx="7" cy="-4" r="3" fill="#1E3248"/></g><rect x="-26" y="2" width="52" height="16" fill="#6CC3E8"/></g><g transform="translate(34 0)"><g class="fx boat"><path d="M-26-4H26L18 8H-18Z" fill="#E2482F" stroke="#1E3248" stroke-width="4" stroke-linejoin="round"/><path d="M0-4V-46" stroke="#1E3248" stroke-width="4"/><path d="M2-44L24-10H2Z" fill="#F7ECD4" stroke="#1E3248" stroke-width="3" stroke-linejoin="round"/><g class="top flagwave"><path d="M0-46L-14-40L0-36Z" fill="#F6B531"/></g></g></g>',
+    hr:'<ellipse cx="0" cy="-1" rx="78" ry="7" fill="#1E3248" opacity=".12"/><g stroke="#1E3248" stroke-width="5" stroke-linejoin="round"><rect x="-54" y="-72" width="34" height="72" fill="#C9D6E3"/><rect x="-18" y="-112" width="38" height="112" fill="#E7EEF5"/><rect x="22" y="-60" width="30" height="60" fill="#B6C7D8"/></g><g fill="#6CC3E8"><rect x="-46" y="-62" width="7" height="9"/><rect x="-34" y="-62" width="7" height="9"/><rect x="-46" y="-44" width="7" height="9"/><rect x="-34" y="-44" width="7" height="9"/><rect x="-46" y="-26" width="7" height="9"/><rect x="-34" y="-26" width="7" height="9"/><rect x="-9" y="-100" width="8" height="10"/><rect x="5" y="-100" width="8" height="10"/><rect x="-9" y="-80" width="8" height="10"/><rect x="5" y="-80" width="8" height="10"/><rect x="-9" y="-60" width="8" height="10"/><rect x="5" y="-60" width="8" height="10"/><rect x="-9" y="-40" width="8" height="10"/><rect x="5" y="-40" width="8" height="10"/><rect x="29" y="-50" width="7" height="9"/><rect x="40" y="-50" width="7" height="9"/><rect x="29" y="-32" width="7" height="9"/><rect x="40" y="-32" width="7" height="9"/></g><path d="M0-112V-124" stroke="#1E3248" stroke-width="4"/><path d="M68 0V-30M-70 0V-24" stroke="#7A5A3C" stroke-width="6" stroke-linecap="round"/><g class="ctr bloom"><circle cx="68" cy="-44" r="20" fill="#9B6FC9" stroke="#1E3248" stroke-width="4"/><circle cx="56" cy="-34" r="12" fill="#B48BE0"/><circle cx="80" cy="-50" r="10" fill="#B48BE0"/></g><g class="ctr bloom" style="animation-delay:-1.4s"><circle cx="-70" cy="-36" r="16" fill="#9B6FC9" stroke="#1E3248" stroke-width="4"/><circle cx="-62" cy="-42" r="8" fill="#B48BE0"/></g>',
+    ny:'<path d="M-78 0L-40-70Q-34-80-28-70L8 0Z" fill="#5A9E48" stroke="#1E3248" stroke-width="5" stroke-linejoin="round"/><path d="M-30 0L12-104Q18-116 24-104L70 0Z" fill="#3F8740" stroke="#1E3248" stroke-width="5" stroke-linejoin="round"/><path d="M8-76L12-104Q18-116 24-104L32-78Q20-86 8-76Z" fill="#E9F2DA"/><path d="M30 0L56-54Q62-64 68-54L86 0Z" fill="#6BB356" stroke="#1E3248" stroke-width="5" stroke-linejoin="round"/><g fill="#2E6B34" stroke="#1E4A25" stroke-width="2"><path d="M-58 0L-50-28L-42 0Z"/><path d="M-44 0L-37-22L-30 0Z"/><path d="M44 0L51-26L58 0Z"/></g><g class="cloud"><path d="M-30-112a14 14 0 0 1 22-10a18 18 0 0 1 32 4a12 12 0 0 1 4 22h-54a12 12 0 0 1-4-16Z" fill="#fff" stroke="#1E3248" stroke-width="3" opacity=".95"/></g>',
+    gz:'<path d="M-70 0V-34Q-70-50-40-54Q0-60 40-54Q70-50 70-34V0Z" fill="#B99C7C" stroke="#1E3248" stroke-width="5" stroke-linejoin="round"/><g stroke="#8A6C4E" stroke-width="3" fill="none"><path d="M-66-12H66M-68-24H68M-66-36Q0-48 66-36"/></g><path d="M-20-40L-26 0H26L20-40Q14-96 0-96Q-14-96-20-40Z" fill="#C9AE8C" stroke="#1E3248" stroke-width="5" stroke-linejoin="round"/><g stroke="#8A6C4E" stroke-width="3"><path d="M-24-12H24M-22-26H22M-20-40H20M-16-54H16M-12-68H12M-7-82H7"/></g><path d="M-60-54Q-58-66-48-62" fill="none" stroke="#5A9E48" stroke-width="5" stroke-linecap="round"/>',
+    mt:'<ellipse cx="0" cy="-1" rx="70" ry="7" fill="#1E3248" opacity=".12"/><path d="M-62 0Q-66-40-20-44Q40-48 58-20Q64-6 58 0Z" fill="#B59A7E" stroke="#1E3248" stroke-width="5" stroke-linejoin="round"/><ellipse cx="-4" cy="-64" rx="30" ry="21" fill="#C7AE92" stroke="#1E3248" stroke-width="5"/><ellipse cx="10" cy="-96" rx="20" ry="14" fill="#D6BFA4" stroke="#1E3248" stroke-width="5"/><path d="M-30-30Q-10-38 20-34" fill="none" stroke="#9A7F62" stroke-width="3" stroke-linecap="round"/><path d="M50 0Q48-16 62-14Q72-12 70 0Z" fill="#6BB356" stroke="#3F8740" stroke-width="3"/><g class="soar"><path d="M-66-124q12-10 22 0q10-10 22 0" fill="none" stroke="#1E3248" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></g>'
+    ,mp:'<ellipse cx="4" cy="-6" rx="74" ry="14" fill="#6CC3E8" stroke="#2F7FB0" stroke-width="4"/><path d="M-34-8C-36-30-34-52-30-70M-31-56L-48-72M-31-62L-14-78" fill="none" stroke="#1E3248" stroke-width="9" stroke-linecap="round"/><path d="M-34-8C-36-30-34-52-30-70M-31-56L-48-72M-31-62L-14-78" fill="none" stroke="#D8C9A4" stroke-width="4" stroke-linecap="round"/><ellipse cx="-30" cy="-82" rx="52" ry="15" fill="#8FBF5A" stroke="#1E3248" stroke-width="5"/><g stroke="#D9772B" stroke-width="3.5" stroke-linecap="round" fill="none"><path d="M-54-68q3 6 0 10M-20-66q3 6 0 10M2-70q3 6 0 10"/></g><g transform="translate(34 -8)"><g class="fx boat"><path d="M-30-6H30L22 4H-22Z" fill="#E2482F" stroke="#1E3248" stroke-width="4" stroke-linejoin="round"/><circle cx="-8" cy="-14" r="7" fill="#F6B531" stroke="#1E3248" stroke-width="3"/><path d="M-22-26L8 2" stroke="#1E3248" stroke-width="4" stroke-linecap="round"/></g></g>'
+    ,cm:'<path d="M-84 0L-58-50L-46-36L-22-100L-4-62L12-84L40-28L54-44L84 0Z" fill="#AEB8C2" stroke="#1E3248" stroke-width="5" stroke-linejoin="round"/><path d="M-22-100L-12-78L-26-70ZM12-84L20-66L8-62ZM-58-50L-52-40L-62-38Z" fill="#F4F6F8"/><path d="M-40-20L-30-44L-18-28" fill="none" stroke="#8A96A2" stroke-width="3" stroke-linecap="round"/><rect x="24" y="-40" width="14" height="40" rx="3" fill="#6CC3E8"/><path class="streak" d="M31-38V-2" stroke="#fff" stroke-width="4" stroke-linecap="round"/><g fill="#2E6B34" stroke="#1E4A25" stroke-width="2"><path d="M-74 0L-66-26L-58 0Z"/><path d="M58 0L65-24L72 0Z"/></g><g class="cloud"><path d="M-60-104a12 12 0 0 1 20-8a15 15 0 0 1 28 4a10 10 0 0 1 3 19h-46a10 10 0 0 1-5-15Z" fill="#fff" stroke="#1E3248" stroke-width="3"/></g>'
+    ,gn:'<ellipse cx="0" cy="-2" rx="92" ry="10" fill="#E9D6A6" stroke="#C9AE72" stroke-width="3"/><path d="M-80 -4V-58Q-80-70-68-70H64Q78-70 78-58V-4Z" fill="#D9643A" stroke="#1E3248" stroke-width="5" stroke-linejoin="round"/><g stroke="#B8492A" stroke-width="3" fill="none"><path d="M-78-22H76M-78-40H76M-78-56H76"/></g><path d="M-74-70Q-60-80-46-70Q-30-82-12-70Q6-80 22-70Q40-82 58-70Q70-78 76-68" fill="#6BB356" stroke="#3F8740" stroke-width="3"/><path d="M-60 -2Q0 8 60 -2" fill="none" stroke="#6CC3E8" stroke-width="6" stroke-linecap="round"/><g transform="translate(92 -4) scale(.9)"><path d="M-9 0L-7-30Q-7-36-14-44M7 0L7-30Q7-36 14-46M0-30V-50" fill="none" stroke="#7A5A3C" stroke-width="7" stroke-linecap="round"/><path d="M-11 0L-8-32H8L11 0Z" fill="#9A7350"/><circle cx="-16" cy="-48" r="9" fill="#5A9E48"/><circle cx="16" cy="-50" r="9" fill="#5A9E48"/><circle cx="0" cy="-56" r="10" fill="#6BB356"/></g>'
+  };
+  // where each landmark sits, where the bike parks, and where its name tag floats
+  var LAYOUT={
+    vf:{art:[151,318],stop:[240,372],tag:[151,222],tw:172},
+    hw:{art:[188,448],stop:[288,490],tag:[190,480],tw:104},
+    kb:{art:[326,252],stop:[352,342],tag:[300,200],tw:148},
+    mp:{art:[445,170],stop:[458,246],tag:[445,76],tw:140},
+    hr:{art:[587,312],stop:[575,372],tag:[587,222],tw:100},
+    ny:{art:[722,350],stop:[640,426],tag:[716,250],tw:106},
+    cm:{art:[712,494],stop:[688,580],tag:[716,404],tw:150},
+    gn:{art:[615,640],stop:[525,664],tag:[615,548],tw:146},
+    gz:{art:[577,514],stop:[485,568],tag:[577,428],tw:188},
+    mt:{art:[372,540],stop:[410,612],tag:[372,462],tw:152}
+  };
+  var START=[70,400];
+
+  PLACES.forEach(function(pl,i){
+    var L=LAYOUT[pl.id];
+    var g=document.createElementNS(NS,'g');
+    g.setAttribute('class','place locked');g.id='pl'+i;
+    g.setAttribute('transform','translate('+L.art[0]+' '+L.art[1]+') scale(.72)');
+    g.innerHTML='<g class="lm fx">'+ART[pl.id]+'</g>';
+    $('places').appendChild(g);
+    var r=document.createElementNS(NS,'g');
+    r.setAttribute('transform','translate('+L.stop[0]+' '+(L.stop[1]-2)+')');
+    r.innerHTML='<ellipse class="ctr ring" id="ring'+i+'" rx="46" ry="14" fill="none" stroke="#F6B531" stroke-width="5"/>';
+    $('rings').appendChild(r);
+    var t=document.createElementNS(NS,'g');
+    t.setAttribute('transform','translate('+L.tag[0]+' '+L.tag[1]+')');t.id='tag'+i;
+    t.innerHTML='<g class="tag fx"><rect x="'+(-L.tw/2)+'" y="-19" width="'+L.tw+'" height="34" rx="17"/><text y="7">'+pl.name+'</text>'+
+      '<g transform="translate('+(L.tw/2-2)+' -18)"><g class="tick ctr"><circle r="13" fill="#3F8F3A" stroke="#1E3248" stroke-width="3"/><path d="M-6 0L-2 5L7-5" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></g></g></g>';
+    $('tags').appendChild(t);
+  });
+
+  /* ---------- bike ---------- */
+  var bike=$('mbike'),flip=$('mflip'),hop=$('mhop'),face=$('face'),wheels=[].slice.call(document.querySelectorAll('.mw'));
+  var pos={x:START[0],y:START[1]},dir=1,flipS=1,ang=0,wheelA=0;
+  function drawBike(){
+    var sx=Math.abs(flipS)<.08?(flipS<0?-.08:.08):flipS;
+    bike.setAttribute('transform','translate('+pos.x.toFixed(2)+' '+pos.y.toFixed(2)+') rotate('+ang.toFixed(2)+')');
+    flip.setAttribute('transform','scale('+sx.toFixed(3)+' 1)');
+    wheels.forEach(function(w){w.setAttribute('transform','rotate('+wheelA.toFixed(1)+')')});
+  }
+  drawBike();
+  function mood(sad){$('happy').style.display=sad?'none':'';$('sad').style.display=sad?'':'none'}
+  function bikeHop(){hop.animate([{transform:'none',easing:'cubic-bezier(.3,.6,.5,1)'},{transform:'translateY(-22px) rotate(-8deg)',offset:.38,easing:'cubic-bezier(.5,0,.7,.4)'},{transform:'translateY(0) scale(1.07,.93)',offset:.7,easing:'ease-out'},{transform:'none'}],{duration:760})}
+  function bikeShake(){hop.animate([{transform:'none'},{transform:'rotate(-7deg)'},{transform:'rotate(6deg)'},{transform:'rotate(-4deg)'},{transform:'rotate(2deg)'},{transform:'none'}],{duration:560,easing:'ease-in-out'});
+    face.animate([{transform:'none'},{transform:'scale(1.15,.85)'},{transform:'none'}],{duration:420,easing:'ease-out'})}
+  function burst(x,y){
+    for(var i=0;i<9;i++){
+      var u=document.createElementNS(NS,'use');
+      u.setAttribute('href','#star');u.setAttribute('x',x-9);u.setAttribute('y',y-9);u.setAttribute('width',18);u.setAttribute('height',18);
+      $('fxLayer').appendChild(u);
+      var a=i/9*Math.PI*2,r=55+Math.random()*30;
+      var an=u.animate([{transform:'translate(0,0) scale(.3)',opacity:1},{transform:'translate('+Math.cos(a)*r+'px,'+Math.sin(a)*r+'px) scale(1.1) rotate(120deg)',opacity:0}],{duration:800,easing:'cubic-bezier(.2,.8,.3,1)'});
+      an.onfinish=(function(n){return function(){n.remove()}})(u);
+    }
+  }
+
+  var route=$('route'),dotAcc=0;
+  function rideTo(tx,ty,token){
+    return new Promise(function(res){
+      var ax=pos.x,ay=pos.y,dx=tx-ax,dy=ty-ay,len=Math.hypot(dx,dy)||1;
+      if(reduced||len<2){pos.x=tx;pos.y=ty;drawBike();return res()}
+      var nx=-dy/len*Math.min(70,len*.18),ny=dx/len*Math.min(70,len*.18); if(ny>0){nx=-nx;ny=-ny} // arc bulges upward
+      route.setAttribute('d','M'+ax+' '+ay+'C'+(ax+dx*.33+nx)+' '+(ay+dy*.33+ny)+' '+(ax+dx*.66+nx)+' '+(ay+dy*.66+ny)+' '+tx+' '+ty);
+      var total=route.getTotalLength(),dur=Math.max(1500,total/210*1000),start=performance.now(),prev=start,cur=0,lastPuff=0;
+      function ease(x){return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2}
+      function pt(l){return route.getPointAtLength(Math.max(0,Math.min(total,l)))}
+      function f(now){
+        if(token!==game.token)return res();
+        var dt=Math.min(.05,(now-prev)/1000);prev=now;
+        var x=Math.min(1,(now-start)/dur),before=cur;cur=total*ease(x);
+        var vel=dt?(cur-before)/dt:0,p=pt(cur),a=pt(cur-12),b=pt(cur+12),ddx=b.x-a.x,ddy=b.y-a.y;
+        if(Math.abs(ddx)>1.5)dir=ddx<0?-1:1;
+        var target=Math.max(-18,Math.min(18,Math.atan2(ddy,Math.abs(ddx)||.001)*180/Math.PI*dir));
+        ang+=(target-ang)*(1-Math.exp(-dt*7));flipS+=(dir-flipS)*(1-Math.exp(-dt*9));
+        wheelA+=(cur-before)/15*180/Math.PI;
+        pos.x=p.x;pos.y=p.y;drawBike();
+        dotAcc+=cur-before;
+        if(dotAcc>18){dotAcc=0;var c=document.createElementNS(NS,'circle');c.setAttribute('cx',p.x.toFixed(1));c.setAttribute('cy',(p.y-1).toFixed(1));c.setAttribute('r','3.6');c.setAttribute('fill','#E2482F');c.setAttribute('class','ctr dot');$('trail').appendChild(c)}
+        if(vel>70&&now-lastPuff>(vel>180?70:140)){lastPuff=now;
+          var d=document.createElementNS(NS,'circle');d.setAttribute('cx',p.x-dir*28);d.setAttribute('cy',p.y-5);d.setAttribute('r',5);d.setAttribute('fill','#fff');$('fxLayer').appendChild(d);
+          var an=d.animate([{transform:'translate(0,0) scale(.6)',opacity:.75},{transform:'translate('+(-dir*16)+'px,-12px) scale(1.9)',opacity:0}],{duration:700,easing:'cubic-bezier(.2,.7,.4,1)'});an.onfinish=function(){d.remove()};
+        }
+        if(x>=1){
+          var settle=performance.now();
+          (function s(n){var k=Math.min(.05,(n-settle)/1000);settle=n;ang+=(0-ang)*(1-Math.exp(-k*8));drawBike();if(Math.abs(ang)>.3&&token===game.token)requestAnimationFrame(s)})(settle);
+          return res();
+        }
+        requestAnimationFrame(f);
+      }
+      requestAnimationFrame(f);
+    });
+  }
+
+  /* ---------- map pop-up (only visible as an overlay on small screens) ---------- */
+  var mapTimer=0;
+  function openMap(cap,btn){clearTimeout(mapTimer);$('mapCap').textContent=cap||'Your trip so far';$('mapClose').textContent=btn||'Back to the questions';document.body.classList.add('mapOpen')}
+  function closeMap(delay){clearTimeout(mapTimer);if(delay){mapTimer=setTimeout(function(){document.body.classList.remove('mapOpen')},delay)}else document.body.classList.remove('mapOpen')}
+  $('mapBtn').onclick=function(){openMap(game.phase==='ask'?'Clock\u2019s still ticking!':'Your trip so far')};
+  $('mapClose').onclick=function(){closeMap()};
+  $('mapwrap').addEventListener('click',function(e){if(e.target===this)closeMap()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeMap()});
+
+  /* ---------- game state ---------- */
+  var game={token:0,stop:0,score:0,phase:'start',round:[],qi:0,wrong:0,results:[],streak:0,time:60,cleared:0};
+  var best=0; try{best=+localStorage.getItem('zimtrip-best')||0}catch(e){}
+  $('best').textContent=best;
+  function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+  function setScore(add){
+    var from=game.score;game.score+=add;
+    var el=$('score'),t0=performance.now();
+    (function step(n){var k=Math.min(1,(n-t0)/500);el.textContent=Math.round(from+(game.score-from)*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(step)})(t0);
+    if(add>0){var f=document.createElement('span');f.className='float';f.textContent='+'+add;$('chipScore').appendChild(f);
+      var a=f.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(-26px)',opacity:0}],{duration:900,easing:'cubic-bezier(.2,.7,.4,1)'});a.onfinish=function(){f.remove()}}
+  }
+  function setLives(){[].forEach.call(document.querySelectorAll('.life'),function(l,i){l.classList.toggle('lost',i<game.wrong)})}
+  function setStop(){$('stopNum').textContent=game.phase==='start'?'–':(Math.min(game.stop+1,PLACES.length)+'/'+PLACES.length)}
+
+  function show(html,focusSel){
+    panel.innerHTML='<div class="scr">'+html+'</div>';
+    var f=focusSel&&panel.querySelector(focusSel); if(f)f.focus({preventScroll:true});
+    if(window.innerWidth<900&&panel.getBoundingClientRect().top<0)window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});
+  }
+
+  function startScreen(){
+    game.phase='start';setStop();
+    show('<p class="eyebrow">An ExploreLocally.co.zw trivia ride</p><h1>Tomato’s Zim Trip</h1>'+
+      '<p class="lede">Hop on the bike and pedal from Victoria Falls to the Matobo Hills. Each stop has five questions about the place you’ve just ridden into.</p>'+
+      '<ul class="rules"><li><i>5</i>questions at every stop</li><li><i>60</i>seconds on the clock per stop</li><li><i>2</i>wrong answers and the trip is over</li></ul>'+
+      '<button class="cta" id="go" type="button">Start riding →</button>'+(best?'<p class="small">Your best so far: '+best+' points</p>':''),'#go');
+    $('go').onclick=newGame;
+  }
+
+  function resetMap(){
+    $('trail').innerHTML='';
+    PLACES.forEach(function(p,i){$('pl'+i).setAttribute('class','place locked');$('tag'+i).firstChild.classList.remove('on');$('tag'+i).classList.remove('done');$('ring'+i).classList.remove('on')});
+  }
+
+  function newGame(){
+    closeMap();clearTimeout(autoT);
+    game.token++;game.stop=0;game.score=0;game.streak=0;game.cleared=0;game.wrong=0;
+    $('score').textContent='0';setLives();mood(false);resetMap();
+    pos.x=START[0];pos.y=START[1];dir=1;flipS=1;ang=0;drawBike();
+    rideToStop();
+  }
+
+  async function rideToStop(){
+    var i=game.stop,t=game.token,L=LAYOUT[PLACES[i].id];
+    game.phase='ride';setStop();game.wrong=0;setLives();mood(false);
+    $('ring'+i).classList.add('on');
+    openMap('Pedalling to '+PLACES[i].name+'\u2026','Skip to the questions');
+    show('<p class="eyebrow">Stop '+(i+1)+' of '+PLACES.length+'</p><h2>Pedalling to '+esc(PLACES[i].name)+'…</h2><p class="lede">'+esc(PLACES[i].blurb)+'</p>');
+    await rideTo(L.stop[0],L.stop[1],t); if(t!==game.token)return;
+    arrive(i);
+  }
+
+  function arrive(i){
+    var pl=$('pl'+i);pl.setAttribute('class','place');
+    var lm=pl.querySelector('.lm');lm.classList.remove('celebrate');void lm.getBBox();lm.classList.add('celebrate');
+    $('tag'+i).firstChild.classList.add('on');$('ring'+i).classList.remove('on');
+    bikeHop();burst(LAYOUT[PLACES[i].id].tag[0],LAYOUT[PLACES[i].id].tag[1]);
+    game.phase='ready';
+    closeMap(1700);
+    show('<p class="eyebrow">Stop '+(i+1)+' of '+PLACES.length+'</p><h2>Welcome to '+esc(PLACES[i].name)+'!</h2><p class="lede">'+esc(PLACES[i].blurb)+'</p>'+
+      '<ul class="rules"><li><i>5</i>questions about '+esc(PLACES[i].name)+'</li><li><i>60</i>seconds — the clock starts when you do</li><li><i>4</i>right answers to ride on</li></ul>'+
+      '<button class="cta" id="begin" type="button">Start the clock</button>','#begin');
+    $('begin').onclick=beginRound;
+  }
+
+  // question rotation: prefer questions this player hasn't seen yet, then start a fresh cycle
+  var seenMem={};
+  function loadSeen(){try{return JSON.parse(localStorage.getItem('zimtrip-seen'))||seenMem}catch(e){return seenMem}}
+  function saveSeen(v){seenMem=v;try{localStorage.setItem('zimtrip-seen',JSON.stringify(v))}catch(e){}}
+  function pickQuestions(pl){
+    var all=pl.qs.map(function(_,i){return i}),seenAll=loadSeen(),seen=seenAll[pl.id]||[];
+    var unseen=shuffle(all.filter(function(i){return seen.indexOf(i)<0}));
+    var chosen,next;
+    if(unseen.length>=5){chosen=unseen.slice(0,5);next=seen.concat(chosen)}
+    else{chosen=unseen.concat(shuffle(seen).slice(0,5-unseen.length));next=chosen.slice()}
+    seenAll[pl.id]=next;saveSeen(seenAll);
+    return chosen.map(function(i){return pl.qs[i]});
+  }
+  function beginRound(){
+    var pl=PLACES[game.stop];
+    game.round=pickQuestions(pl).map(function(q){var o=shuffle(q.o);return{q:q.q,o:o,a:o.indexOf(q.o[0]),f:q.f,s:q.s||pl.src}});
+    game.qi=0;game.wrong=0;game.results=[];game.time=60;setLives();
+    askQuestion();tickStart();
+  }
+
+  var tickRAF=0,lastTick=0;
+  function tickStart(){cancelAnimationFrame(tickRAF);lastTick=performance.now();tickRAF=requestAnimationFrame(tick)}
+  function tick(now){
+    var dt=(now-lastTick)/1000;lastTick=now;
+    if(game.phase==='ask'){
+      game.time=Math.max(0,game.time-dt);paintClock();
+      if(game.time<=0){timeUp();return}
+    }
+    if(game.phase==='ask'||game.phase==='feedback')tickRAF=requestAnimationFrame(tick);
+  }
+  function paintClock(){
+    var c=$('clock'),b=$('barFill'),bar=$('bar');if(!c)return;
+    var s=Math.ceil(game.time);c.textContent=Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60);
+    b.style.transform='scaleX('+(game.time/60).toFixed(4)+')';
+    var hot=game.time<=10;c.classList.toggle('hot',hot);bar.classList.toggle('hot',hot);
+  }
+  function pips(){
+    var h='';for(var k=0;k<5;k++){var r=game.results[k];h+='<span class="pip'+(r===true?' ok':r===false?' no':k===game.qi?' now':'')+'"></span>'}return h;
+  }
+
+  function askQuestion(){
+    var pl=PLACES[game.stop],q=game.round[game.qi];
+    game.phase='ask';
+    show('<div class="qtop"><p class="eyebrow">'+esc(pl.name)+' · Q'+(game.qi+1)+' of 5</p><span class="clock" id="clock">1:00</span></div>'+
+      '<div class="bar" id="bar"><i id="barFill"></i></div>'+
+      '<div class="pips" aria-hidden="true">'+pips()+'</div>'+
+      '<p class="question">'+esc(q.q)+'</p>'+
+      '<div class="opts">'+q.o.map(function(o,k){return '<div class="optrow"><button class="opt" type="button" data-k="'+k+'"><span class="k">'+'ABCD'[k]+'</span><span>'+esc(o)+'</span></button></div>'}).join('')+'</div>'+
+      '<div id="fbSlot"></div>');
+    paintClock();
+    [].forEach.call(panel.querySelectorAll('.opt'),function(b){b.onclick=function(){choose(+b.dataset.k)}});
+  }
+
+  var autoT=0;
+  function choose(k){
+    if(game.phase!=='ask')return;
+    game.phase='feedback';
+    var q=game.round[game.qi],ok=k===q.a,btns=panel.querySelectorAll('.opt'),tok=game.token;
+    [].forEach.call(btns,function(b,n){b.disabled=true;if(n===q.a)b.classList.add('right');else if(n===k)b.classList.add('wrong');else b.classList.add('dim')});
+    game.results[game.qi]=ok;
+    var pts=0;
+    if(ok){pts=100+game.streak*20;game.streak++;setScore(pts);bikeHop()}
+    else{game.wrong++;game.streak=0;setLives();bikeShake()}
+    var out=game.wrong>=2,last=game.qi===4;
+    var label=out?'See your result':last?'Finish the stop':'Next question';
+    function advance(){
+      clearTimeout(autoT);
+      if(tok!==game.token||game.phase!=='feedback')return;
+      if(out)return gameOver('wrong');
+      if(last)return stopCleared();
+      game.qi++;askQuestion();
+    }
+    // "Source" chip on the correct answer
+    var row=panel.querySelectorAll('.optrow')[q.a];row.classList.add('hasSrc');
+    var sb=document.createElement('button');sb.type='button';sb.className='srcbtn';sb.textContent='Source';
+    sb.setAttribute('aria-label','Check the source for this answer');row.appendChild(sb);
+    if(ok){
+      var wait=reduced?2400:1900;
+      $('fbSlot').innerHTML='<div class="fb" style="--auto:'+wait+'ms"><p><strong class="good">Spot on! +'+pts+'</strong>'+(last?'Stop complete!':'Next question coming up\u2026')+'</p><div class="autobar"><i></i></div></div>';
+      autoT=setTimeout(advance,wait);
+    }else{
+      $('fbSlot').innerHTML='<div class="fb"><p><strong class="bad">'+(out?'That\u2019s two wrong\u2026':'Not quite \u2014 one life left')+'</strong>'+
+        'The answer is <b>'+esc(q.o[q.a])+'</b>. '+esc(q.f)+'</p><button class="cta" id="next" type="button">'+label+'</button></div>';
+      var n=$('next');n.focus({preventScroll:true});n.onclick=advance;
+    }
+    panel.querySelector('.pips').innerHTML=pips();
+    sb.onclick=function(){clearTimeout(autoT);openSource(q,ok?advance:null,label)};
+  }
+
+  function openSource(q,cont,label){
+    var old=panel.querySelector('.srcpop');if(old)old.remove();
+    var d=document.createElement('div');d.className='srcpop';d.setAttribute('role','dialog');d.setAttribute('aria-label','Fact check');
+    var title=decodeURIComponent(q.s.split('/wiki/')[1]||'').replace(/_/g,' ');
+    d.innerHTML='<p class="eyebrow">Fact check</p><p class="question">'+esc(q.q)+'</p>'+
+      '<p class="lede"><b>Answer: '+esc(q.o[q.a])+'</b><br>'+esc(q.f)+'</p>'+
+      '<a class="link-btn" href="'+esc(q.s)+'" target="_blank" rel="noopener">Read \u201c'+esc(title)+'\u201d on Wikipedia \u2197</a>'+
+      '<button class="cta" id="srcGo" type="button">'+(cont?esc(label):'Back')+'</button>';
+    panel.appendChild(d);
+    var g=$('srcGo');g.focus({preventScroll:true});
+    g.onclick=function(){d.remove();if(cont)cont();else{var n=$('next');if(n)n.focus({preventScroll:true})}};
+  }
+
+  function timeUp(){
+    game.phase='over';
+    [].forEach.call(panel.querySelectorAll('.opt'),function(b){b.disabled=true});
+    gameOver('time');
+  }
+
+  function stopCleared(){
+    game.phase='cleared';cancelAnimationFrame(tickRAF);
+    var i=game.stop,right=game.results.filter(Boolean).length,secs=Math.ceil(game.time);
+    var timeBonus=secs*5,perfect=right===5?250:0;
+    setScore(timeBonus+perfect);game.cleared=i+1;
+    $('tag'+i).classList.add('done');
+    var lastStop=i===PLACES.length-1;
+    if(lastStop)return win();
+    var next=PLACES[i+1];
+    show('<p class="eyebrow">Stop '+(i+1)+' cleared</p><h2>'+esc(PLACES[i].name)+' ✓</h2>'+
+      '<div class="stats"><div class="stat"><span>Correct</span><b>'+right+'/5</b></div><div class="stat"><span>Time bonus</span><b>+'+timeBonus+'</b></div>'+(perfect?'<div class="stat"><span>Perfect stop</span><b>+250</b></div>':'')+'</div>'+
+      '<p class="lede">Next up: <b>'+esc(next.name)+'</b>. Lives refill at every stop.</p>'+
+      '<button class="cta" id="ride" type="button">Ride to '+esc(next.name)+' →</button>'+exploreBtn(PLACES[i]),'#ride');
+    $('ride').onclick=function(){game.stop++;rideToStop()};
+  }
+
+  var SITE='https://explorelocally.co.zw', GAME_URL='https://zimtrivia.explorelocally.co.zw';
+  function siteLink(pl){return SITE+pl.link+'?utm_source=zimtrip&utm_medium=game&utm_campaign=tomato_trivia'}
+  function exploreBtn(pl,lead){return '<a class="link-btn explore" href="'+siteLink(pl)+'" target="_blank" rel="noopener">'+(lead||'')+esc(pl.linkLabel)+' on ExploreLocally \u2197</a>'}
+  var WA='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z" fill="#25D366" stroke="#1E3248" stroke-width="1.6"/><path d="M8.6 8.2c.2-.4.5-.4.8-.4h.5c.2 0 .4.1.5.4l.7 1.6c.1.2 0 .4-.1.6l-.5.6c.4.9 1.3 1.8 2.3 2.3l.6-.6c.2-.2.4-.2.6-.1l1.6.7c.3.1.4.3.4.5v.5c0 .3 0 .6-.4.8-.5.3-1.4.6-2.6.2-2.2-.8-3.9-2.5-4.7-4.7-.3-1.1 0-2 .3-2.4z" fill="#fff"/></svg>';
+  function shareBlock(text){
+    return '<div class="actions"><a class="link-btn wa" href="https://wa.me/?text='+encodeURIComponent(text)+'" target="_blank" rel="noopener">'+WA+'Share on WhatsApp</a>'+
+      '<button class="link-btn" id="copyBtn" type="button">Copy my score</button></div><textarea class="sharetext" id="shareText" readonly hidden aria-label="Your score message">'+esc(text)+'</textarea>';
+  }
+  function wireCopy(text){
+    var b=$('copyBtn');if(!b)return;
+    b.onclick=function(){
+      function fallback(){var t=$('shareText');t.hidden=false;t.focus();t.select();b.textContent='Select and copy the text below'}
+      try{navigator.clipboard.writeText(text).then(function(){b.textContent='Copied!'},fallback)}catch(e){fallback()}
+    };
+  }
+  function fmt(n){return n.toLocaleString('en-GB')}
+
+  function saveBest(){var nb=game.score>best;if(nb){best=game.score;$('best').textContent=best;try{localStorage.setItem('zimtrip-best',best)}catch(e){}}return nb}
+
+  function gameOver(why){
+    game.phase='over';cancelAnimationFrame(tickRAF);closeMap();mood(true);bikeShake();
+    var nb=saveBest(),pl=PLACES[game.stop];
+    var msg='I made it to '+pl.name+' on Tomato\u2019s Zim Trip and scored '+fmt(game.score)+' points \ud83c\udf45\ud83d\udeb2 Think you know Zimbabwe better? '+GAME_URL;
+    show('<p class="eyebrow">Game over</p><h2>'+(why==='time'?'Out of time at '+esc(pl.name):'Two wrong at '+esc(pl.name))+'</h2>'+
+      '<p class="lede">'+(why==='time'?'The clock ran out before all five questions were answered.':'The tomato needs four right answers to keep riding.')+'</p>'+
+      '<div class="stats"><div class="stat"><span>Score</span><b>'+game.score+'</b></div><div class="stat"><span>Stops cleared</span><b>'+game.cleared+'/'+PLACES.length+'</b></div><div class="stat"><span>Best</span><b>'+best+'</b></div></div>'+
+      (nb&&game.score>0?'<p class="small">New personal best!</p>':'')+
+      '<button class="cta" id="again" type="button">Ride again</button>'+shareBlock(msg)+exploreBtn(pl,'Plan a real trip \u00b7 '),'#again');
+    $('again').onclick=newGame;wireCopy(msg);
+  }
+
+  function win(){
+    game.phase='won';var nb=saveBest();bikeHop();
+    var msg='I cycled all 10 stops of Tomato\u2019s Zim Trip and scored '+fmt(game.score)+' points \ud83c\udf45\ud83d\udeb2 Can you beat me? '+GAME_URL;
+    openMap('Trip complete!','See your score');
+    PLACES.forEach(function(p,i){var L=LAYOUT[p.id];setTimeout(function(){burst(L.tag[0],L.tag[1])},i*160)});
+    show('<p class="eyebrow">Trip complete</p><h2>You toured all of Zimbabwe!</h2>'+
+      '<p class="lede">Ten stops, from the smoke that thunders to the bald heads of Matobo. The tomato is very proud of you.</p>'+
+      '<div class="stats"><div class="stat"><span>Final score</span><b>'+game.score+'</b></div><div class="stat"><span>Best</span><b>'+best+'</b></div></div>'+
+      (nb?'<p class="small">New personal best!</p>':'')+
+      '<button class="cta" id="again" type="button">Ride again</button>'+shareBlock(msg),'#again');
+    $('again').onclick=newGame;wireCopy(msg);
+  }
+
+  document.addEventListener('keydown',function(e){
+    if(game.phase!=='ask'||e.metaKey||e.ctrlKey||e.altKey)return;
+    var k='abcd'.indexOf(e.key.toLowerCase()); if(k<0)k='1234'.indexOf(e.key);
+    if(k>=0){e.preventDefault();choose(k)}
+  });
+
+  startScreen();
+})();
+</script>
+</body>
+</html>
