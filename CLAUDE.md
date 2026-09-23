@@ -13,6 +13,7 @@ Zimbabwe; each of 10 stops has 5 questions and a 60-second clock. It will live a
 | `favicon.svg` | Tomato (Masi) icon. |
 | `og-image.png` | 1200×630 link-preview image for WhatsApp/Facebook. |
 | `vercel.json` | Static hosting config (headers, caching). |
+| `api/scores.js` | Scoreboard API (Vercel serverless function, no npm packages) backed by Upstash Redis. |
 
 ### Question format (`questions.js`)
 - Each stop: `{ id, name, lon, lat, link, linkLabel, src, blurb, qs: [...] }`.
@@ -28,6 +29,7 @@ Zimbabwe; each of 10 stops has 5 questions and a 60-second clock. It will live a
 ## Hard rules
 - **British English** in all copy.
 - Keep it a single static page — no frameworks, no bundler, no tracking scripts added without asking.
+  The only server code is `api/scores.js`; keep it dependency-free (plain `fetch` to Upstash's REST API).
 - **DNS caution:** when touching Cloudflare, only add/change the `zimtrivia` record.
   **Never modify MX, TXT (SPF/DKIM/DMARC) or the apex/`www` records** of explorelocally.co.zw.
 
@@ -80,13 +82,25 @@ gh repo create zim-trivia --public --source=. --remote=origin --push \
 
 ## Nice-to-haves already discussed (not built yet)
 - Link from the main explorelocally.co.zw site (nav or a "Play the Zim trivia" banner).
-- Shared leaderboard.
 - Harder later stops (shorter clock).
 - Destination pages on explorelocally.co.zw for Mana Pools, Chimanimani and Gonarezhou — then update their `link` in `questions.js` (currently `/listings/parks/` and `/listings/hiking-trails/`).
 
 ## Sound
 - Sound effects are synthesised with Web Audio in `index.html` (`SFX` object) — no audio files.
   Mute toggle in the top bar (or press M); the choice is saved in `localStorage` key `zimtrip-muted`.
+
+## Scoreboard
+- Players add a nickname on the game-over / trip-complete screen; the start screen has "See the scoreboard".
+- `api/scores.js`: `GET` returns the top 10 for this week and all time; `POST {name, score}` saves a score.
+  Each nickname keeps its best score (`ZADD GT`). Weekly boards reset Monday 00:00 Harare time.
+- Storage: Upstash Redis (`zim-trivia-scores`, added via the Vercel Marketplace; env vars `KV_REST_API_URL` /
+  `KV_REST_API_TOKEN`). Keys: `lb:all`, `lb:week:YYYY-Www` (expire after 60 days), `lb:rl:<ip>` (rate limit).
+  Non-production deployments use the `lb-dev:` prefix so test scores never reach the real boards.
+- Guards: nickname 2–20 letters/numbers, short swear-word filter, score 1–36,000, 5 submissions per IP per 10 min.
+  Scores are sent by the browser, so a determined cheat can still fake one — remove it by hand.
+- **Removing a name:** Vercel → Storage → `zim-trivia-scores` → Open in Upstash → Data Browser → open `lb:all`
+  and this week's `lb:week:…` key → delete the member. (CLI: `ZREM lb:all "Name"`.)
+- `localStorage`: `zimtrip-name` remembers the player's nickname.
 
 ## Naming
 - The game is **Masi's Zim Trivia**; the tomato character is **Masi**. The `zimtrip-*` localStorage keys

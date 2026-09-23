@@ -141,6 +141,31 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
 .explore{justify-self:start}
 .sharetext{width:100%;min-height:74px;font:600 14px/1.4 var(--body);color:var(--navy);background:var(--paper);border:2.5px solid var(--navy);border-radius:12px;padding:8px 10px;resize:none}
 
+/* scoreboard */
+.sbform{display:grid;gap:8px;background:var(--paper);border:3px solid var(--navy);border-radius:16px;padding:12px}
+.sbform label{font-weight:900;font-size:15px}
+.sbrow{display:flex;gap:8px;flex-wrap:wrap}
+.sbrow input{flex:1 1 150px;min-width:0;font:700 17px/1.2 var(--body);color:var(--navy);background:#fff;border:2.5px solid var(--navy);
+  border-radius:999px;padding:10px 14px}
+.sbrow input:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.sbrow .link-btn{background:var(--yellow)}
+.sbform[aria-busy="true"]{opacity:.6;pointer-events:none}
+.sbmsg{margin:0;font-weight:800;font-size:15px}
+.sbmsg.bad{color:var(--bad)}
+.tabs{display:flex;gap:6px}
+.tabs button{font:800 14px/1 var(--body);color:var(--navy);background:transparent;border:2.5px solid var(--navy);border-radius:999px;
+  padding:8px 14px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--navy);color:var(--paper)}
+.board{list-style:none;margin:0;padding:0;display:grid;gap:4px;counter-reset:rank}
+.board li{counter-increment:rank;display:flex;align-items:center;gap:10px;background:var(--paper);border:2px solid var(--navy);
+  border-radius:12px;padding:6px 12px;font-weight:800}
+.board li::before{content:counter(rank);font-family:var(--display);width:22px;text-align:center;color:var(--muted)}
+.board li:nth-child(1)::before{content:'\1F947'}.board li:nth-child(2)::before{content:'\1F948'}.board li:nth-child(3)::before{content:'\1F949'}
+.board li span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board li b{font:400 18px/1 var(--display);font-variant-numeric:tabular-nums}
+.board li.me{background:var(--yellow)}
+.board-empty{margin:0;font-weight:700;color:var(--muted)}
+
 /* question */
 .qtop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
 .clock{font-family:var(--display);font-size:26px;font-variant-numeric:tabular-nums;line-height:1}
@@ -516,8 +541,9 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
     show('<p class="eyebrow">An ExploreLocally.co.zw trivia ride</p><h1>Masi’s Zim Trivia</h1>'+
       '<p class="lede">Hop on the bike and pedal from Victoria Falls to the Matobo Hills. Each stop has five questions about the place you’ve just ridden into.</p>'+
       '<ul class="rules"><li><i>5</i>questions at every stop</li><li><i>60</i>seconds on the clock per stop</li><li><i>2</i>wrong answers and the trip is over</li></ul>'+
-      '<button class="cta" id="go" type="button">Start riding →</button>'+(best?'<p class="small">Your best so far: '+best+' points</p>':''),'#go');
-    $('go').onclick=newGame;
+      '<button class="cta" id="go" type="button">Start riding →</button>'+(best?'<p class="small">Your best so far: '+best+' points</p>':'')+
+      '<button class="link-btn explore" id="sbOpen" type="button">\ud83c\udfc6 See the scoreboard</button>','#go');
+    $('go').onclick=newGame;$('sbOpen').onclick=scoreboardScreen;
   }
 
   function resetMap(){
@@ -701,6 +727,64 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
 
   function saveBest(){var nb=game.score>best;if(nb){best=game.score;$('best').textContent=best;try{localStorage.setItem('zimtrip-best',best)}catch(e){}}return nb}
 
+  /* ---------- scoreboard (api/scores.js, Upstash Redis) ---------- */
+  var sbTab='week',sbData=null,sbMe='';try{sbMe=localStorage.getItem('zimtrip-name')||''}catch(e){}
+  function boardHtml(){
+    if(!sbData)return '<p class="board-empty">Loading the scoreboard…</p>';
+    if(sbData.error)return '<p class="board-empty">'+esc(sbData.error)+'</p>';
+    var list=sbData[sbTab]||[];
+    var tabs='<div class="tabs" role="tablist">'+[['week','This week'],['all','All time']].map(function(t){
+      return '<button type="button" role="tab" data-tab="'+t[0]+'" aria-selected="'+(sbTab===t[0])+'">'+t[1]+'</button>'}).join('')+'</div>';
+    return tabs+(list.length?'<ol class="board">'+list.map(function(r){
+      return '<li'+(r.name===sbMe?' class="me"':'')+'><span>'+esc(r.name)+'</span><b>'+fmt(r.score)+'</b></li>'}).join('')+'</ol>'
+      :'<p class="board-empty">'+(sbTab==='week'?'No scores yet this week — be the first!':'No scores yet — be the first!')+'</p>');
+  }
+  function paintBoard(){
+    var el=$('sbBoard');if(!el)return;el.innerHTML=boardHtml();
+    [].forEach.call(el.querySelectorAll('[data-tab]'),function(b){b.onclick=function(){sbTab=b.dataset.tab;paintBoard();var n=$('sbBoard').querySelector('[data-tab="'+sbTab+'"]');if(n)n.focus()}});
+  }
+  function loadBoard(){
+    sbData=null;paintBoard();
+    fetch('/api/scores').then(function(r){return r.json()}).then(function(d){sbData=d;paintBoard()})
+      .catch(function(){sbData={error:'The scoreboard isn’t available right now.'};paintBoard()});
+  }
+  function scoreboardScreen(){
+    game.phase='start';
+    show('<p class="eyebrow">Masi’s Zim Trivia</p><h2>Scoreboard</h2><p class="lede">The top ten riders. Weekly scores reset every Monday.</p>'+
+      '<div id="sbBoard"></div><button class="cta" id="sbBack" type="button">Back</button>','#sbBack');
+    $('sbBack').onclick=startScreen;loadBoard();
+  }
+  function scoreForm(){
+    if(game.score<=0)return '';
+    return '<form class="sbform" id="sbForm" novalidate><label for="sbName">Get on the scoreboard</label>'+
+      '<div class="sbrow"><input id="sbName" name="name" maxlength="20" autocomplete="nickname" autocapitalize="words" enterkeyhint="send" placeholder="Your nickname" required>'+
+      '<button class="link-btn" type="submit">Add my score</button></div>'+
+      '<p class="sbmsg" id="sbMsg" role="status"></p></form><div id="sbBoard" hidden></div>';
+  }
+  function wireScoreForm(){
+    var f=$('sbForm');if(!f)return;
+    var input=$('sbName'),msg=$('sbMsg'),score=game.score,tok=game.token;
+    try{input.value=localStorage.getItem('zimtrip-name')||''}catch(e){}
+    f.onsubmit=function(e){
+      e.preventDefault();
+      var name=input.value.replace(/\s+/g,' ').trim();
+      if(name.length<2){msg.className='sbmsg bad';msg.textContent='Type a nickname (at least 2 letters).';input.focus();return}
+      f.setAttribute('aria-busy','true');msg.className='sbmsg';msg.textContent='Sending…';
+      fetch('/api/scores',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,score:score})})
+        .then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d}})})
+        .then(function(res){
+          if(tok!==game.token)return;
+          f.removeAttribute('aria-busy');
+          if(!res.ok){msg.className='sbmsg bad';msg.textContent=res.d.error||'That didn’t work — try again.';return}
+          try{localStorage.setItem('zimtrip-name',res.d.name)}catch(e){}
+          sbMe=res.d.name;sbData=res.d;sbTab='week';
+          f.outerHTML='<p class="sbmsg">Nice one, '+esc(res.d.name)+'! Your best puts you <b>#'+res.d.weekRank+'</b> this week and <b>#'+res.d.allRank+'</b> of all time.</p>';
+          var b=$('sbBoard');b.hidden=false;paintBoard();
+        })
+        .catch(function(){if(tok!==game.token)return;f.removeAttribute('aria-busy');msg.className='sbmsg bad';msg.textContent='Couldn’t reach the scoreboard — check your connection and try again.'});
+    };
+  }
+
   function gameOver(why){
     game.phase='over';cancelAnimationFrame(tickRAF);closeMap();mood(true);bikeShake();sfx('over');
     var nb=saveBest(),pl=PLACES[game.stop];
@@ -708,9 +792,9 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
     show('<p class="eyebrow">Game over</p><h2>'+(why==='time'?'Out of time at '+esc(pl.name):'Two wrong at '+esc(pl.name))+'</h2>'+
       '<p class="lede">'+(why==='time'?'The clock ran out before all five questions were answered.':'Masi needs four right answers to keep riding.')+'</p>'+
       '<div class="stats"><div class="stat"><span>Score</span><b>'+game.score+'</b></div><div class="stat"><span>Stops cleared</span><b>'+game.cleared+'/'+PLACES.length+'</b></div><div class="stat"><span>Best</span><b>'+best+'</b></div></div>'+
-      (nb&&game.score>0?'<p class="small">New personal best!</p>':'')+
+      (nb&&game.score>0?'<p class="small">New personal best!</p>':'')+scoreForm()+
       '<button class="cta" id="again" type="button">Ride again</button>'+shareBlock(msg)+exploreBtn(pl,'Plan a real trip \u00b7 '),'#again');
-    $('again').onclick=newGame;wireCopy(msg);
+    $('again').onclick=newGame;wireCopy(msg);wireScoreForm();
   }
 
   function win(){
@@ -721,9 +805,9 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
     show('<p class="eyebrow">Trip complete</p><h2>You toured all of Zimbabwe!</h2>'+
       '<p class="lede">Ten stops, from the smoke that thunders to the bald heads of Matobo. Masi is very proud of you.</p>'+
       '<div class="stats"><div class="stat"><span>Final score</span><b>'+game.score+'</b></div><div class="stat"><span>Best</span><b>'+best+'</b></div></div>'+
-      (nb?'<p class="small">New personal best!</p>':'')+
+      (nb?'<p class="small">New personal best!</p>':'')+scoreForm()+
       '<button class="cta" id="again" type="button">Ride again</button>'+shareBlock(msg),'#again');
-    $('again').onclick=newGame;wireCopy(msg);
+    $('again').onclick=newGame;wireCopy(msg);wireScoreForm();
   }
 
   document.addEventListener('keydown',function(e){
