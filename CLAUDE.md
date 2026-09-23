@@ -1,6 +1,6 @@
-# Tomato's Zim Trip — Claude Code instructions
+# Masi's Zim Trivia — Claude Code instructions
 
-A static, zero-build trivia game for ExploreLocally. The tomato cycles across a cartoon map of
+A static, zero-build trivia game for ExploreLocally. Masi the tomato cycles across a cartoon map of
 Zimbabwe; each of 10 stops has 5 questions and a 60-second clock. It will live at
 **https://zimtrivia.explorelocally.co.zw**.
 
@@ -10,7 +10,7 @@ Zimbabwe; each of 10 stops has 5 questions and a 60-second clock. It will live a
 |---|---|
 | `index.html` | The whole game: markup, CSS, map art and game logic. No framework, no build step. |
 | `questions.js` | The question bank (`PLACES`). **Edit questions here, not in `index.html`.** |
-| `favicon.svg` | Tomato icon. |
+| `favicon.svg` | Tomato (Masi) icon. |
 | `og-image.png` | 1200×630 link-preview image for WhatsApp/Facebook. |
 | `vercel.json` | Static hosting config (headers, caching). |
 
@@ -41,9 +41,9 @@ Assumes `gh`, the Vercel CLI (or Vercel MCP) and Cloudflare access are already a
 ```bash
 git init -b main
 git add .
-git commit -m "Tomato's Zim Trip: initial release"
+git commit -m "Masi's Zim Trivia: initial release"
 gh repo create zim-trivia --public --source=. --remote=origin --push \
-  --description "Tomato's Zim Trip – a Zimbabwe trivia ride by ExploreLocally"
+  --description "Masi's Zim Trivia – a Zimbabwe trivia ride by ExploreLocally"
 ```
 (Use `--private` instead if Rufaro prefers; Vercel works with either.)
 
@@ -83,3 +83,7 @@ gh repo create zim-trivia --public --source=. --remote=origin --push \
 - Shared leaderboard.
 - Harder later stops (shorter clock), sound effects with a mute toggle.
 - Destination pages on explorelocally.co.zw for Mana Pools, Chimanimani and Gonarezhou — then update their `link` in `questions.js` (currently `/listings/parks/` and `/listings/hiking-trails/`).
+
+## Naming
+- The game is **Masi's Zim Trivia**; the tomato character is **Masi**. The `zimtrip-*` localStorage keys
+  and `utm_source=zimtrip` are kept from the old name so saved progress and analytics carry over.

@@ -1,4 +1,4 @@
-# Tomato's Zim Trip 🍅🚲
+# Masi's Zim Trivia 🍅🚲
 
 A Zimbabwe trivia ride by [ExploreLocally](https://explorelocally.co.zw).
 Cycle from Victoria Falls to the Matobo Hills — ten stops, five questions and 60 seconds at each.

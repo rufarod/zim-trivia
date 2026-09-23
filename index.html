@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Tomato's Zim Trip – Zimbabwe trivia by ExploreLocally</title>
-<meta name="description" content="Cycle across Zimbabwe with the ExploreLocally tomato. Ten stops from Victoria Falls to the Matobo Hills, five questions and 60 seconds at each. How far can you ride?">
+<title>Masi's Zim Trivia – Zimbabwe trivia by ExploreLocally</title>
+<meta name="description" content="Cycle across Zimbabwe with Masi, the ExploreLocally tomato. Ten stops from Victoria Falls to the Matobo Hills, five questions and 60 seconds at each. How far can you ride?">
 <link rel="canonical" href="https://zimtrivia.explorelocally.co.zw/">
 <meta name="theme-color" content="#6DB8CE">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ExploreLocally">
-<meta property="og:title" content="Tomato's Zim Trip – how well do you know Zimbabwe?">
+<meta property="og:title" content="Masi's Zim Trivia – how well do you know Zimbabwe?">
 <meta property="og:description" content="Ten stops, five questions each, 60 seconds on the clock. Two wrong answers and the trip is over.">
 <meta property="og:url" content="https://zimtrivia.explorelocally.co.zw/">
 <meta property="og:image" content="https://zimtrivia.explorelocally.co.zw/og-image.png">
@@ -239,7 +239,7 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
 <body>
 <div class="app">
   <header class="hud">
-    <p class="brand">Tomato's Zim Trip</p>
+    <p class="brand">Masi's Zim Trivia</p>
     <div class="chip" id="chipScore"><span>Score</span><b id="score">0</b></div>
     <div class="chip"><span>Stop</span><b id="stopNum">–</b></div>
     <div class="chip" aria-label="Lives this stop"><span>Lives</span>
@@ -254,7 +254,7 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
 
   <main class="main">
     <div class="mapwrap" id="mapwrap"><div class="mapcard"><p class="mapcap" id="mapCap">Your trip</p>
-      <svg id="map" viewBox="0 0 800 720" role="img" aria-label="Map of Zimbabwe showing the tomato's cycling route">
+      <svg id="map" viewBox="0 0 800 720" role="img" aria-label="Map of Zimbabwe showing Masi's cycling route">
         <defs>
           <symbol id="star" viewBox="-10 -10 20 20"><path d="M0-10Q1.5-1.5 10 0Q1.5 1.5 0 10Q-1.5 1.5-10 0Q-1.5-1.5 0-10Z" fill="#FFF6D8"/></symbol>
           <radialGradient id="tomG" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="#FF7A55"/><stop offset=".55" stop-color="#E2482F"/><stop offset="1" stop-color="#B8301E"/></radialGradient>
@@ -466,7 +466,7 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
 
   function startScreen(){
     game.phase='start';setStop();
-    show('<p class="eyebrow">An ExploreLocally.co.zw trivia ride</p><h1>Tomato’s Zim Trip</h1>'+
+    show('<p class="eyebrow">An ExploreLocally.co.zw trivia ride</p><h1>Masi’s Zim Trivia</h1>'+
       '<p class="lede">Hop on the bike and pedal from Victoria Falls to the Matobo Hills. Each stop has five questions about the place you’ve just ridden into.</p>'+
       '<ul class="rules"><li><i>5</i>questions at every stop</li><li><i>60</i>seconds on the clock per stop</li><li><i>2</i>wrong answers and the trip is over</li></ul>'+
       '<button class="cta" id="go" type="button">Start riding →</button>'+(best?'<p class="small">Your best so far: '+best+' points</p>':''),'#go');
@@ -655,9 +655,9 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
   function gameOver(why){
     game.phase='over';cancelAnimationFrame(tickRAF);closeMap();mood(true);bikeShake();
     var nb=saveBest(),pl=PLACES[game.stop];
-    var msg='I made it to '+pl.name+' on Tomato\u2019s Zim Trip and scored '+fmt(game.score)+' points \ud83c\udf45\ud83d\udeb2 Think you know Zimbabwe better? '+GAME_URL;
+    var msg='I made it to '+pl.name+' on Masi\u2019s Zim Trivia and scored '+fmt(game.score)+' points \ud83c\udf45\ud83d\udeb2 Think you know Zimbabwe better? '+GAME_URL;
     show('<p class="eyebrow">Game over</p><h2>'+(why==='time'?'Out of time at '+esc(pl.name):'Two wrong at '+esc(pl.name))+'</h2>'+
-      '<p class="lede">'+(why==='time'?'The clock ran out before all five questions were answered.':'The tomato needs four right answers to keep riding.')+'</p>'+
+      '<p class="lede">'+(why==='time'?'The clock ran out before all five questions were answered.':'Masi needs four right answers to keep riding.')+'</p>'+
       '<div class="stats"><div class="stat"><span>Score</span><b>'+game.score+'</b></div><div class="stat"><span>Stops cleared</span><b>'+game.cleared+'/'+PLACES.length+'</b></div><div class="stat"><span>Best</span><b>'+best+'</b></div></div>'+
       (nb&&game.score>0?'<p class="small">New personal best!</p>':'')+
       '<button class="cta" id="again" type="button">Ride again</button>'+shareBlock(msg)+exploreBtn(pl,'Plan a real trip \u00b7 '),'#again');
@@ -666,11 +666,11 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
 
   function win(){
     game.phase='won';var nb=saveBest();bikeHop();
-    var msg='I cycled all 10 stops of Tomato\u2019s Zim Trip and scored '+fmt(game.score)+' points \ud83c\udf45\ud83d\udeb2 Can you beat me? '+GAME_URL;
+    var msg='I cycled all 10 stops of Masi\u2019s Zim Trivia and scored '+fmt(game.score)+' points \ud83c\udf45\ud83d\udeb2 Can you beat me? '+GAME_URL;
     openMap('Trip complete!','See your score');
     PLACES.forEach(function(p,i){var L=LAYOUT[p.id];setTimeout(function(){burst(L.tag[0],L.tag[1])},i*160)});
     show('<p class="eyebrow">Trip complete</p><h2>You toured all of Zimbabwe!</h2>'+
-      '<p class="lede">Ten stops, from the smoke that thunders to the bald heads of Matobo. The tomato is very proud of you.</p>'+
+      '<p class="lede">Ten stops, from the smoke that thunders to the bald heads of Matobo. Masi is very proud of you.</p>'+
       '<div class="stats"><div class="stat"><span>Final score</span><b>'+game.score+'</b></div><div class="stat"><span>Best</span><b>'+best+'</b></div></div>'+
       (nb?'<p class="small">New personal best!</p>':'')+
       '<button class="cta" id="again" type="button">Ride again</button>'+shareBlock(msg),'#again');
