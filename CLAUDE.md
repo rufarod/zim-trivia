@@ -81,8 +81,12 @@ gh repo create zim-trivia --public --source=. --remote=origin --push \
 ## Nice-to-haves already discussed (not built yet)
 - Link from the main explorelocally.co.zw site (nav or a "Play the Zim trivia" banner).
 - Shared leaderboard.
-- Harder later stops (shorter clock), sound effects with a mute toggle.
+- Harder later stops (shorter clock).
 - Destination pages on explorelocally.co.zw for Mana Pools, Chimanimani and Gonarezhou — then update their `link` in `questions.js` (currently `/listings/parks/` and `/listings/hiking-trails/`).
+
+## Sound
+- Sound effects are synthesised with Web Audio in `index.html` (`SFX` object) — no audio files.
+  Mute toggle in the top bar (or press M); the choice is saved in `localStorage` key `zimtrip-muted`.
 
 ## Naming
 - The game is **Masi's Zim Trivia**; the tomato character is **Masi**. The `zimtrip-*` localStorage keys

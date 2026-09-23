@@ -11,6 +11,7 @@ Two wrong answers at a stop and the trip is over.
 - 5 random questions per stop from a bank of 15+; unseen questions come first, so you can play at least three times without repeats.
 - Right answers move on automatically; wrong answers show the correct one and a fact.
 - Every correct answer has a **Source** button linking to where the fact can be checked.
+- Sound effects for rides, answers, the last 10 seconds and results, with a mute toggle (or press M).
 - Scoring: 100 per right answer + 20 per answer in your current streak, plus 5 points for every second left and 250 for a perfect stop.
 
 ## Project structure

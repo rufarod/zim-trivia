@@ -59,15 +59,22 @@ body{
 .mapwrap{position:relative}
 #map{width:100%;height:auto;display:block;overflow:visible}
 .mapbtn,.mapcap,.mapclose{display:none}
+.soundbtn{cursor:pointer;font:inherit;color:var(--navy)}
+.soundbtn svg{width:18px;height:18px}
+.soundbtn .off{display:none}
+.soundbtn[aria-pressed="false"] .on{display:none}
+.soundbtn[aria-pressed="false"] .off{display:inline}
 
 /* ---------- phones & small tablets: questions first, map pops up ---------- */
 @media (max-width:899px){
   .app{padding-block:12px 24px;gap:12px}
-  .hud{display:grid;grid-template-columns:auto auto 1fr auto;align-items:center;gap:10px 8px}
+  .hud{display:grid;grid-template-columns:auto auto 1fr auto auto;align-items:center;gap:10px 8px}
   .brand{font-size:26px;grid-column:1/4;grid-row:1}
-  .mapbtn{grid-column:4;grid-row:1}
-  .hud .chip:not(.mapbtn){grid-row:2;justify-self:start}
-  .hud .chip:nth-child(4){grid-column:3/5}
+  .soundbtn{grid-column:4;grid-row:1;padding-inline:9px}
+  .soundbtn span{display:none}
+  .mapbtn{grid-column:5;grid-row:1}
+  .hud .chip:not(.mapbtn):not(.soundbtn){grid-row:2;justify-self:start}
+  .hud .chip:nth-child(4){grid-column:3/6}
   .main{grid-template-columns:minmax(0,1fr)}
   .chip{padding:4px 10px 4px 9px;gap:6px;box-shadow:0 3px 0 var(--navy)}
   .chip b{font-size:17px}
@@ -249,6 +256,7 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
       </div>
     </div>
     <div class="chip best"><span>Best</span><b id="best">0</b></div>
+    <button class="chip soundbtn" id="soundBtn" type="button" aria-pressed="true" aria-label="Sound effects" title="Sound effects (M)"><svg class="on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="#F6B531" stroke="#1E3248" stroke-width="2" stroke-linejoin="round"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="#1E3248" stroke-width="2" stroke-linecap="round"/></svg><svg class="off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="#F6B531" stroke="#1E3248" stroke-width="2" stroke-linejoin="round"/><path d="M16 9.5l5 5M21 9.5l-5 5" stroke="#1E3248" stroke-width="2" stroke-linecap="round"/></svg><span>Sound</span></button>
     <button class="chip mapbtn" id="mapBtn" type="button" aria-label="Show the map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6.5V20l6-2.5 6 2.5 6-2.5V4l-6 2.5z" fill="#F6B531" stroke="#1E3248" stroke-width="2" stroke-linejoin="round"/><path d="M9 4v13.5M15 6.5V20" stroke="#1E3248" stroke-width="2"/></svg><span>Map</span></button>
   </header>
 
@@ -432,6 +440,45 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
     });
   }
 
+  /* ---------- sound effects (synthesised with Web Audio, no files) ---------- */
+  var muted=false; try{muted=localStorage.getItem('zimtrip-muted')==='1'}catch(e){}
+  var actx=null,master=null;
+  function audio(){
+    if(!actx){
+      var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;
+      try{if(navigator.audioSession)navigator.audioSession.type='ambient'}catch(e){} // mix with the player's music; respect the silent switch
+      actx=new AC();master=actx.createGain();master.gain.value=.5;master.connect(actx.destination);
+    }
+    if(actx.state==='suspended')actx.resume();
+    return actx;
+  }
+  // one note: frequency (Hz, or [from,to] for a slide), start offset and length (s), wave, volume
+  function note(f,at,len,type,vol){
+    var t=actx.currentTime+at,o=actx.createOscillator(),g=actx.createGain();
+    o.type=type||'triangle';
+    if(f.length){o.frequency.setValueAtTime(f[0],t);o.frequency.exponentialRampToValueAtTime(f[1],t+len)}else o.frequency.setValueAtTime(f,t);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol||.3,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+len);
+    o.connect(g);g.connect(master);o.start(t);o.stop(t+len+.05);
+  }
+  function bell(at){note(2093,at,.6,'sine',.18);note(5230,at,.25,'sine',.06)}
+  var SFX={
+    ride:function(){bell(0);bell(.16)},
+    arrive:function(){[523,659,784].forEach(function(f,i){note(f,i*.09,.3,'triangle',.25)})},
+    go:function(){note(880,0,.1,'square',.08);note(1320,.12,.18,'square',.08)},
+    right:function(n){var k=Math.pow(2,Math.min(n||0,6)/12);note(659*k,0,.14,'triangle',.3);note(988*k,.09,.28,'triangle',.3)},
+    wrong:function(){note([196,98],0,.35,'sawtooth',.12);note([185,92],0,.35,'square',.06)},
+    tick:function(){note(1400,0,.04,'square',.06)},
+    cleared:function(){[523,659,784,1047].forEach(function(f,i){note(f,i*.1,i===3?.5:.2,'triangle',.28)})},
+    over:function(){[392,370,349].forEach(function(f,i){note(f,i*.3,.3,'triangle',.25)});note([330,311],.9,.8,'triangle',.25)},
+    win:function(){[523,659,784,1047,784,1047].forEach(function(f,i){note(f,i*.12,i===5?.7:.18,'triangle',.28)});bell(.8);bell(.96)},
+    on:function(){note(880,0,.12,'triangle',.2)}
+  };
+  function sfx(name,arg){if(muted||!audio())return;try{SFX[name](arg)}catch(e){}}
+  function paintSound(){$('soundBtn').setAttribute('aria-pressed',String(!muted));$('soundBtn').querySelector('span').textContent=muted?'Muted':'Sound'}
+  function toggleSound(){muted=!muted;try{localStorage.setItem('zimtrip-muted',muted?'1':'0')}catch(e){}paintSound();sfx('on')}
+  $('soundBtn').onclick=toggleSound;paintSound();
+  document.addEventListener('keydown',function(e){if((e.key==='m'||e.key==='M')&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&!/INPUT|TEXTAREA/.test(e.target.tagName))toggleSound()});
+
   /* ---------- map pop-up (only visible as an overlay on small screens) ---------- */
   var mapTimer=0;
   function openMap(cap,btn){clearTimeout(mapTimer);$('mapCap').textContent=cap||'Your trip so far';$('mapClose').textContent=btn||'Back to the questions';document.body.classList.add('mapOpen')}
@@ -489,7 +536,7 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
   async function rideToStop(){
     var i=game.stop,t=game.token,L=LAYOUT[PLACES[i].id];
     game.phase='ride';setStop();game.wrong=0;setLives();mood(false);
-    $('ring'+i).classList.add('on');
+    $('ring'+i).classList.add('on');sfx('ride');
     openMap('Pedalling to '+PLACES[i].name+'\u2026','Skip to the questions');
     show('<p class="eyebrow">Stop '+(i+1)+' of '+PLACES.length+'</p><h2>Pedalling to '+esc(PLACES[i].name)+'…</h2><p class="lede">'+esc(PLACES[i].blurb)+'</p>');
     await rideTo(L.stop[0],L.stop[1],t); if(t!==game.token)return;
@@ -500,7 +547,7 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
     var pl=$('pl'+i);pl.setAttribute('class','place');
     var lm=pl.querySelector('.lm');lm.classList.remove('celebrate');void lm.getBBox();lm.classList.add('celebrate');
     $('tag'+i).firstChild.classList.add('on');$('ring'+i).classList.remove('on');
-    bikeHop();burst(LAYOUT[PLACES[i].id].tag[0],LAYOUT[PLACES[i].id].tag[1]);
+    bikeHop();burst(LAYOUT[PLACES[i].id].tag[0],LAYOUT[PLACES[i].id].tag[1]);sfx('arrive');
     game.phase='ready';
     closeMap(1700);
     show('<p class="eyebrow">Stop '+(i+1)+' of '+PLACES.length+'</p><h2>Welcome to '+esc(PLACES[i].name)+'!</h2><p class="lede">'+esc(PLACES[i].blurb)+'</p>'+
@@ -525,16 +572,17 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
   function beginRound(){
     var pl=PLACES[game.stop];
     game.round=pickQuestions(pl).map(function(q){var o=shuffle(q.o);return{q:q.q,o:o,a:o.indexOf(q.o[0]),f:q.f,s:q.s||pl.src}});
-    game.qi=0;game.wrong=0;game.results=[];game.time=60;setLives();
-    askQuestion();tickStart();
+    game.qi=0;game.wrong=0;game.results=[];game.time=60;lastBeep=0;setLives();
+    askQuestion();tickStart();sfx('go');
   }
 
-  var tickRAF=0,lastTick=0;
+  var tickRAF=0,lastTick=0,lastBeep=0;
   function tickStart(){cancelAnimationFrame(tickRAF);lastTick=performance.now();tickRAF=requestAnimationFrame(tick)}
   function tick(now){
     var dt=(now-lastTick)/1000;lastTick=now;
     if(game.phase==='ask'){
       game.time=Math.max(0,game.time-dt);paintClock();
+      var sec=Math.ceil(game.time);if(sec<=10&&sec>0&&sec!==lastBeep){lastBeep=sec;sfx('tick')}
       if(game.time<=0){timeUp();return}
     }
     if(game.phase==='ask'||game.phase==='feedback')tickRAF=requestAnimationFrame(tick);
@@ -570,8 +618,8 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
     [].forEach.call(btns,function(b,n){b.disabled=true;if(n===q.a)b.classList.add('right');else if(n===k)b.classList.add('wrong');else b.classList.add('dim')});
     game.results[game.qi]=ok;
     var pts=0;
-    if(ok){pts=100+game.streak*20;game.streak++;setScore(pts);bikeHop()}
-    else{game.wrong++;game.streak=0;setLives();bikeShake()}
+    if(ok){pts=100+game.streak*20;sfx('right',game.streak);game.streak++;setScore(pts);bikeHop()}
+    else{game.wrong++;game.streak=0;setLives();bikeShake();sfx('wrong')}
     var out=game.wrong>=2,last=game.qi===4;
     var label=out?'See your result':last?'Finish the stop':'Next question';
     function advance(){
@@ -625,6 +673,7 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
     $('tag'+i).classList.add('done');
     var lastStop=i===PLACES.length-1;
     if(lastStop)return win();
+    sfx('cleared');
     var next=PLACES[i+1];
     show('<p class="eyebrow">Stop '+(i+1)+' cleared</p><h2>'+esc(PLACES[i].name)+' ✓</h2>'+
       '<div class="stats"><div class="stat"><span>Correct</span><b>'+right+'/5</b></div><div class="stat"><span>Time bonus</span><b>+'+timeBonus+'</b></div>'+(perfect?'<div class="stat"><span>Perfect stop</span><b>+250</b></div>':'')+'</div>'+
@@ -653,7 +702,7 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
   function saveBest(){var nb=game.score>best;if(nb){best=game.score;$('best').textContent=best;try{localStorage.setItem('zimtrip-best',best)}catch(e){}}return nb}
 
   function gameOver(why){
-    game.phase='over';cancelAnimationFrame(tickRAF);closeMap();mood(true);bikeShake();
+    game.phase='over';cancelAnimationFrame(tickRAF);closeMap();mood(true);bikeShake();sfx('over');
     var nb=saveBest(),pl=PLACES[game.stop];
     var msg='I made it to '+pl.name+' on Masi\u2019s Zim Trivia and scored '+fmt(game.score)+' points \ud83c\udf45\ud83d\udeb2 Think you know Zimbabwe better? '+GAME_URL;
     show('<p class="eyebrow">Game over</p><h2>'+(why==='time'?'Out of time at '+esc(pl.name):'Two wrong at '+esc(pl.name))+'</h2>'+
@@ -665,7 +714,7 @@ button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
   }
 
   function win(){
-    game.phase='won';var nb=saveBest();bikeHop();
+    game.phase='won';var nb=saveBest();bikeHop();sfx('win');
     var msg='I cycled all 10 stops of Masi\u2019s Zim Trivia and scored '+fmt(game.score)+' points \ud83c\udf45\ud83d\udeb2 Can you beat me? '+GAME_URL;
     openMap('Trip complete!','See your score');
     PLACES.forEach(function(p,i){var L=LAYOUT[p.id];setTimeout(function(){burst(L.tag[0],L.tag[1])},i*160)});
